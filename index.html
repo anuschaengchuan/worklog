@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WorkLog</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0f0f11; --surface: #18181c; --surface2: #222228; --border: #2e2e38;
-      --accent: #f0c040; --accent2: #e07040; --text: #ececec; --muted: #7a7a8a;
+      --bg: #0f0f11; --surface: #202027; --surface2: #2b2b34; --border: #3a3a46;
+      --accent: #f0c040; --accent2: #e07040; --cool-accent: #58b0c4; --text: #ececec; --muted: #7a7a8a;
       --danger: #e05060; --green: #50c878; --radius: 12px;
-      --font: 'Syne', sans-serif; --mono: 'DM Mono', monospace; --header-h: 60px;
+      --font: 'IBM Plex Sans', sans-serif; --mono: 'IBM Plex Sans', sans-serif; --header-h: 60px;
     }
     html, body { height: 100%; }
     body { background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; }
@@ -32,7 +32,7 @@
       padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
     .topbar-back {
-      background: none; border: none; color: var(--accent); font-family: var(--font);
+      background: none; border: none; color: var(--cool-accent); font-family: var(--font);
       font-size: 0.88rem; font-weight: 600; cursor: pointer;
       display: flex; align-items: center; gap: 4px; padding: 6px 0; white-space: nowrap;
     }
@@ -55,8 +55,8 @@
       display: flex; align-items: center; background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 15px 14px; cursor: pointer; transition: border-color 0.15s; gap: 12px;
     }
-    .proj-item:hover { border-color: var(--accent); }
-    .proj-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .proj-item:hover { border-color: var(--cool-accent); }
+    .proj-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cool-accent); flex-shrink: 0; }
     .proj-info { flex: 1; min-width: 0; }
     .proj-name { font-weight: 700; font-size: 0.93rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .proj-meta { font-size: 0.73rem; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
@@ -64,7 +64,7 @@
     .icon-btn { background: none; border: none; cursor: pointer; padding: 7px; border-radius: 8px; display: flex; align-items: center; transition: background 0.15s, color 0.15s; }
     .icon-btn svg { width: 16px; height: 16px; }
     .icon-btn.edit { color: var(--muted); }
-    .icon-btn.edit:hover { color: var(--accent); background: rgba(240,192,64,0.1); }
+    .icon-btn.edit:hover { color: var(--cool-accent); background: rgba(88,176,196,0.12); }
     .icon-btn.del  { color: var(--muted); }
     .icon-btn.del:hover  { color: var(--danger); background: rgba(224,80,96,0.1); }
     .proj-arrow { color: var(--border); }
@@ -75,7 +75,7 @@
       border-radius: var(--radius); padding: 14px; cursor: pointer; font-family: var(--font);
       font-size: 0.88rem; font-weight: 600; transition: all 0.15s; width: 100%;
     }
-    .btn-add:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-add:hover { border-color: var(--cool-accent); color: var(--cool-accent); }
 
     /* ── Cards ── */
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
@@ -89,8 +89,8 @@
     .chip { background: var(--surface2); border-radius: 10px; padding: 11px 6px; text-align: center; }
     .chip .cv { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; }
     .chip .cl { font-size: 0.6rem; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.07em; }
-    .chip.ya .cv { color: var(--accent); }
-    .chip.yr .cv { color: var(--danger); }
+    .chip.ya .cv { color: var(--cool-accent); }
+    .chip.yr .cv { color: #c68f66; }
     .chip.yg .cv { color: var(--green); }
 
     /* ── Days list ── */
@@ -99,19 +99,20 @@
       display: flex; align-items: center; background: var(--surface2); border: 1px solid var(--border);
       border-radius: 10px; padding: 11px 14px; cursor: pointer; transition: border-color 0.15s; gap: 12px;
     }
-    .day-row:hover  { border-color: var(--accent); }
+    .day-row:hover  { border-color: var(--cool-accent); }
     .day-row.logged { border-color: rgba(80,200,120,0.45); }
     .day-row.rwarn  { border-color: var(--danger); }
-    .day-row.is-off { border-color: rgba(240,192,64,0.3); opacity: 0.8; }
+    .day-row.is-off { border-color: rgba(88,176,196,0.32); opacity: 0.8; }
     .dr-date { min-width: 50px; flex-shrink: 0; }
     .dr-name { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
     .dr-num  { font-family: var(--mono); font-size: 0.92rem; margin-top: 2px; }
     .dr-info { flex: 1; min-width: 0; }
-    .dr-times { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
-    .dr-hours { font-family: var(--mono); font-size: 0.82rem; color: var(--green); }
-    .dr-ot    { font-size: 0.7rem; color: var(--accent2); }
-    .dr-rest  { font-size: 0.67rem; color: var(--danger); }
-    .dr-badge { font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: rgba(240,192,64,0.15); color: var(--accent); display: inline-block; }
+    .dr-times { font-family: var(--mono); font-size: 0.78rem; color: var(--text); }
+    .dr-hours { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); }
+    .dr-ot, .dr-rest { font-family: var(--mono); font-size: 0.74rem; }
+    .dr-ot    { color: #c68f66; }
+    .dr-rest  { color: #c57b84; }
+    .dr-badge { font-size: 0.8rem; font-weight: 700; padding: 5px 10px; border-radius: 6px; background: rgba(88,176,196,0.14); color: var(--cool-accent); display: inline-block; }
     .dr-empty { font-size: 0.78rem; color: var(--muted); }
     .dr-arr   { color: var(--border); flex-shrink: 0; }
     .dr-arr svg { width: 14px; height: 14px; }
@@ -168,8 +169,8 @@
       transition: all 0.15s;
     }
     .day-type-btn.active-work  { border-color: var(--green);  color: var(--green);  background: rgba(80,200,120,0.08); }
-    .day-type-btn.active-off   { border-color: var(--accent); color: var(--accent); background: rgba(240,192,64,0.08); }
-    .day-type-btn.active-travel{ border-color: var(--accent2);color: var(--accent2);background: rgba(224,112,64,0.08); }
+    .day-type-btn.active-off   { border-color: var(--cool-accent); color: var(--cool-accent); background: rgba(88,176,196,0.08); }
+    .day-type-btn.active-travel{ border-color: var(--cool-accent); color: var(--cool-accent); background: rgba(88,176,196,0.08); }
 
     /* Results */
     .result-items { display: flex; flex-direction: column; gap: 7px; }
@@ -209,10 +210,77 @@
       padding: 13px; border-radius: 10px; border: none; cursor: pointer; font-family: var(--font);
       font-weight: 700; font-size: 0.88rem; transition: all 0.15s; width: 100%; text-align: center;
     }
-    .btn-primary { background: var(--accent); color: #111; }
-    .btn-primary:hover { background: #ffd060; }
+    .btn-primary { background: var(--cool-accent); color: #0f1b1f; }
+    .btn-primary:hover { background: #6ec2d2; }
     .btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
     .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .btn-row.single { grid-template-columns: 1fr; }
+
+    #report-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 220; display: none; align-items: stretch; justify-content: center; }
+    #report-overlay.open { display: flex; }
+    .report-panel {
+      width: min(1200px, 100%); margin: 18px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 18px; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .report-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 16px 18px; border-bottom: 1px solid var(--border);
+    }
+    .report-title { font-size: 1rem; font-weight: 800; }
+    .report-sub { font-size: 0.74rem; color: var(--muted); margin-top: 4px; }
+    .report-close {
+      background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+      border-radius: 10px; padding: 10px 12px; font-family: var(--font); font-weight: 700;
+    }
+    .report-close:hover { color: var(--text); border-color: var(--muted); }
+    .report-actions { display: flex; align-items: center; gap: 10px; }
+    .report-body { padding: 16px 18px 20px; overflow: auto; }
+    .report-table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 12px; }
+    .report-table { width: 100%; border-collapse: collapse; min-width: 1140px; }
+    .report-table th, .report-table td {
+      padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top;
+      font-size: 0.76rem;
+    }
+    .report-table th {
+      position: sticky; top: 0; background: var(--surface2); color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.64rem;
+    }
+    .report-table td { font-family: var(--mono); }
+    .report-table tbody tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+    .report-table tfoot td {
+      background: rgba(88, 176, 196, 0.14);
+      font-weight: 700;
+      border-top: 1px solid rgba(88, 176, 196, 0.55);
+    }
+    .report-table tfoot tr.report-subtotal td {
+      border-top: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+    .report-total-cell { white-space: nowrap; }
+    .report-total-label {
+      display: block;
+      font-size: 0.58rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+    #confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 230; display: none; align-items: center; justify-content: center; padding: 18px; }
+    #confirm-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    .confirm-dialog {
+      width: min(420px, 100%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    }
+    .confirm-title { font-size: 1rem; font-weight: 800; }
+    .confirm-text { color: var(--muted); font-size: 0.82rem; line-height: 1.55; margin-top: 8px; }
+    .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .btn-danger { background: rgba(224,80,96,0.14); color: #f2a8b1; border: 1px solid rgba(224,80,96,0.28); }
+    .btn-danger:hover { background: rgba(224,80,96,0.2); color: #ffd4d9; }
 
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted); text-align: center; padding: 48px 20px; }
     .empty-state .ei { font-size: 2.8rem; }
@@ -259,6 +327,8 @@
 
 <!-- Settings sheet -->
 <div id="settings-overlay"><div class="settings-sheet" id="settings-sheet"></div></div>
+<div id="report-overlay"><div class="report-panel" id="report-panel"></div></div>
+<div id="confirm-overlay"><div class="confirm-dialog" id="confirm-dialog"></div></div>
 
 <script>
 (() => {
@@ -380,6 +450,91 @@
     return {base:normal, ot25, ot50, ot100, restPen, total};
   }
 
+  function mealSummary(meals){
+    const list = [];
+    if(meals?.breakfast) list.push('Breakfast');
+    if(meals?.lunch) list.push('Lunch');
+    if(meals?.dinner) list.push('Dinner');
+    return list.join(', ');
+  }
+
+  function getDayBreakdown(p, date, rawSess, allSessions){
+    const sess = normalizeSession(rawSess || {});
+    const dtype = sess.dayType || 'work';
+    const isOff = dtype === 'off' || dtype === 'travel';
+    const rate = parseFloat(p.rate) || 0;
+    const perDiem = calcPerDiemMeals(p.perDiemAmount, sess.meals);
+    const breakdown = {
+      date,
+      dayName: dayName(date),
+      type: dtype,
+      start: sess.start || '',
+      end: sess.end || '',
+      breakMins: sess.breakMins ?? '',
+      hours: '',
+      overtime: '',
+      restViolation: '',
+      dayRateValue: 0,
+      ot25: 0,
+      ot50: 0,
+      ot100: 0,
+      restPay: 0,
+      payTotal: 0,
+      perDiemTotal: perDiem.total,
+      meals: mealSummary(sess.meals)
+    };
+
+    if(isOff){
+      breakdown.dayRateValue = rate * 0.5;
+      breakdown.payTotal = rate * 0.5;
+      return breakdown;
+    }
+
+    if(!sess.start || !sess.end) return breakdown;
+
+    const hours = calcH(date, sess.start, sess.end, sess.breakMins);
+    const overtime = calcOT(hours);
+    const restViolation = restViolHours(date, sess.start, allSessions);
+    let pay = calcDayPay(hours, rate, restViolation, dtype);
+    breakdown.dayRateValue = rate;
+    if(dtype === 'work' && hours < 10 && hours > 0 && pay.total < rate){
+      pay = { ...pay, base: rate, ot25: 0, ot50: 0, ot100: 0, restPen: 0, total: rate };
+    }
+
+    breakdown.hours = hours;
+    breakdown.overtime = overtime;
+    breakdown.restViolation = Math.ceil(restViolation);
+    breakdown.ot25 = pay.ot25;
+    breakdown.ot50 = pay.ot50;
+    breakdown.ot100 = pay.ot100;
+    breakdown.restPay = pay.restPen;
+    breakdown.payTotal = pay.total;
+    return breakdown;
+  }
+
+  function getProjectReportRows(projId){
+    const p = normalizeProject(projects.find(x=>x.id===projId));
+    if(!p || !p.dateFrom || !p.dateTo) return [];
+    const sessions = LS.allSess(projId);
+    return dateRange(p.dateFrom, p.dateTo).map(date => getDayBreakdown(p, date, sessions[date], sessions));
+  }
+
+  function getReportTotals(rows){
+    return rows.reduce((acc, row) => {
+      acc.hours += Number(row.hours) || 0;
+      acc.overtime += Number(row.overtime) || 0;
+      acc.restViolation += Number(row.restViolation) || 0;
+      acc.dayRateValue += row.dayRateValue || 0;
+      acc.ot25 += row.ot25 || 0;
+      acc.ot50 += row.ot50 || 0;
+      acc.ot100 += row.ot100 || 0;
+      acc.restPay += row.restPay || 0;
+      acc.perDiemTotal += row.perDiemTotal || 0;
+      acc.payTotal += row.payTotal || 0;
+      return acc;
+    }, { hours:0, overtime:0, restViolation:0, dayRateValue:0, ot25:0, ot50:0, ot100:0, restPay:0, perDiemTotal:0, payTotal:0 });
+  }
+
   function summary(projId){
     const p=normalizeProject(projects.find(x=>x.id===projId));
     if(!p) return {daysWorked:0,totalOT:0,totalPay:0,totalRestViol:0,totalPerDiem:0};
@@ -422,7 +577,6 @@
   // ── Layer 0 ──
   function renderProjects(){
     const body=el('proj-body'); body.innerHTML='';
-    body.appendChild(Object.assign(document.createElement('div'),{className:'list-label',textContent:'Your Projects'}));
     if(!projects.length){
       const e=document.createElement('div'); e.className='empty-state';
       e.innerHTML='<div class="ei">📋</div><p>No projects yet. Add one below.</p>';
@@ -474,8 +628,6 @@
 
     const sessions=LS.allSess(p.id);
     const days=dateRange(p.dateFrom,p.dateTo);
-    const listCard=document.createElement('div'); listCard.className='card';
-    listCard.innerHTML='<div class="card-label">Days</div>';
     const list=document.createElement('div'); list.className='days-list';
 
     days.forEach(date=>{
@@ -497,10 +649,10 @@
       } else if(logged){
         // Start-End time bigger, all info in one small line
         let details = `${h}h`;
-        if(ot>0) details += ` · <span style=\"color:var(--accent2)\">${ot}h OT</span>`;
-        if(rv>0) details += ` · <span class=\"dr-rest\">⚠ ${Math.ceil(rv)}h rest deficit</span>`;
-        info = `<div class=\"dr-times\" style=\"font-size:1rem;font-weight:600;\">${sess.start} – ${sess.end}</div>`
-             + `<div class=\"dr-hours\" style=\"font-size:0.78rem;color:var(--muted);font-weight:400;\">${details}</div>`;
+        if(ot>0) details += ` · <span class=\"dr-ot\">${ot}h OT</span>`;
+        if(rv>0) details += ` · <span class=\"dr-rest\">${Math.ceil(rv)}h SR</span>`;
+        info = `<div class=\"dr-times\" style=\"font-size:0.92rem;font-weight:400;\">${sess.start} – ${sess.end}</div>`
+             + `<div class=\"dr-hours\" style=\"font-size:0.74rem;color:var(--muted);font-weight:400;\">${details}</div>`;
       } else {
         info='<div class="dr-empty">Tap to log</div>';
       }
@@ -513,21 +665,23 @@
       list.appendChild(row);
     });
 
-    listCard.appendChild(list);
-    body.appendChild(listCard);
+    body.appendChild(list);
 
     // Now add summary below
     const s=summary(p.id);
-    const sumCard=document.createElement('div'); sumCard.className='card';
-    sumCard.innerHTML=`<div class="card-label">Summary</div>
-      <div class="chips ${p.perDiemEnabled ? 'chips-5' : 'chips-4'}">
+    const sumCard=document.createElement('div');
+    sumCard.innerHTML=`<div class="chips ${p.perDiemEnabled ? 'chips-5' : 'chips-4'}">
         <div class="chip"><div class="cv">${s.daysWorked}</div><div class="cl">Days</div></div>
         <div class="chip ya"><div class="cv">${fmtMoney(s.totalPay,p.currency||'THB')}</div><div class="cl">Pay</div></div>
         ${p.perDiemEnabled ? `<div class="chip ya"><div class="cv">${fmtMoney(s.totalPerDiem,p.perDiemCurrency||'EUR')}</div><div class="cl">Per Diem</div></div>` : ''}
         <div class="chip yr"><div class="cv">${s.totalOT}h</div><div class="cl">OT</div></div>
-        <div class="chip yr"><div class="cv">${s.totalRestViol}h</div><div class="cl">Rest</div></div>
+        <div class="chip yr"><div class="cv">${s.totalRestViol}h</div><div class="cl">SR</div></div>
+      </div>
+      <div class="btn-row single">
+        <button class="btn btn-primary" id="btn-view-report">View Full Report</button>
       </div>`;
     body.appendChild(sumCard);
+    sumCard.querySelector('#btn-view-report').addEventListener('click',()=>openReport(p.id));
   }
 
   // ── Layer 2 ──
@@ -685,14 +839,14 @@
 
     let html='<div class="result-items">';
     html+=`<div class="result-row"><span class="rl">Total Hours</span><span class="rv accent">${h}h</span></div>`;
-    html+=`<div class="result-row"><span class="rl">Overtime</span><span class="rv ${ot>0?'warn':'green'}">${ot}h</span></div>`;
-    if(rv>0) html+=`<div class="result-row"><span class="rl">Rest deficit</span><span class="rv danger">${Math.ceil(rv)}h (&lt;11h rest)</span></div>`;
+    html+=`<div class="result-row"><span class="rl">OT</span><span class="rv ${ot>0?'warn':'green'}">${ot}h</span></div>`;
+    if(rv>0) html+=`<div class="result-row"><span class="rl">SR</span><span class="rv danger">${Math.ceil(rv)}h (&lt;11h rest)</span></div>`;
     html+='<div class="result-divider"></div>';
     html+=`<div class="result-row"><span class="rl">Day rate (10h)</span><span class="rv">${fmtMoney(rate,cur)}</span></div>`;
     if(ot>=1) html+=`<div class="result-row"><span class="rl">11–12h (+25%)</span><span class="rv warn">${fmtMoney(Math.min(ot,2)*hourR*1.25,cur)}</span></div>`;
     if(ot>=3) html+=`<div class="result-row"><span class="rl">13–14h (+50%)</span><span class="rv warn">${fmtMoney(Math.min(Math.max(ot-2,0),2)*hourR*1.50,cur)}</span></div>`;
     if(ot>=5) html+=`<div class="result-row"><span class="rl">&gt;14h (+100%)</span><span class="rv danger">${fmtMoney(Math.max(ot-4,0)*hourR*2.00,cur)}</span></div>`;
-    if(rv>0)  html+=`<div class="result-row"><span class="rl">Rest violation (+50%)</span><span class="rv danger">${fmtMoney(Math.ceil(rv)*hourR*1.50,cur)}</span></div>`;
+    if(rv>0)  html+=`<div class="result-row"><span class="rl">SR Pay (+50%)</span><span class="rv danger">${fmtMoney(Math.ceil(rv)*hourR*1.50,cur)}</span></div>`;
     if(p.perDiemEnabled){
       html+='<div class="result-divider"></div>';
       html+=`<div class="result-row"><span class="rl">Per diem total</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>`;
@@ -704,6 +858,174 @@
     res.innerHTML=html;
     renderDays();
   }
+
+  function openReport(projId){
+    const p = normalizeProject(projects.find(x=>x.id===projId));
+    if(!p) return;
+    const rows = getProjectReportRows(projId);
+    const totals = getReportTotals(rows);
+    const panel = el('report-panel');
+    panel.innerHTML = `
+      <div class="report-head">
+        <div>
+          <div class="report-title">Detailed Report</div>
+          <div class="report-sub">${p.name} · ${p.dateFrom || '-'} to ${p.dateTo || '-'}</div>
+        </div>
+        <div class="report-actions">
+          <button class="report-close" id="btn-export-report" type="button">Export CSV</button>
+          <button class="report-close" id="btn-close-report" type="button">Close</button>
+        </div>
+      </div>
+      <div class="report-body">
+        <div class="report-table-wrap">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Time</th>
+                <th>Break</th>
+                <th>Hours</th>
+                <th>Overtime</th>
+                <th>Short Rest</th>
+                <th>Day Rate</th>
+                <th>OT +25%</th>
+                <th>OT +50%</th>
+                <th>OT +100%</th>
+                <th>Short Rest +50%</th>
+                ${p.perDiemEnabled ? '<th>Per Diem</th><th>Meals</th>' : ''}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r=>`
+                <tr>
+                  <td>${r.date}<br>${r.dayName}</td>
+                  <td>${r.type}</td>
+                  <td>${r.start || '-'}${r.end ? ` - ${r.end}` : ''}</td>
+                  <td>${r.breakMins === '' ? '-' : `${r.breakMins} min`}</td>
+                  <td>${r.hours === '' ? '-' : `${r.hours}h`}</td>
+                  <td>${r.overtime === '' ? '-' : `${r.overtime}h`}</td>
+                  <td>${r.restViolation === '' ? '-' : `${r.restViolation}h`}</td>
+                  <td>${fmtMoney(r.dayRateValue || 0, p.currency)}</td>
+                  <td>${fmtMoney(r.ot25, p.currency)}</td>
+                  <td>${fmtMoney(r.ot50, p.currency)}</td>
+                  <td>${fmtMoney(r.ot100, p.currency)}</td>
+                  <td>${fmtMoney(r.restPay, p.currency)}</td>
+                  ${p.perDiemEnabled ? `<td>${fmtMoney(r.perDiemTotal, p.perDiemCurrency || 'EUR')}</td><td>${r.meals || '-'}</td>` : ''}
+                  <td>${fmtMoney(r.payTotal, p.currency)}</td>
+                </tr>`).join('')}
+            </tbody>
+            <tfoot>
+              ${p.perDiemEnabled ? `<tr class="report-subtotal">
+                <td colspan="12">Per Diem</td>
+                <td class="report-total-cell" colspan="3"><span class="report-total-label">Per Diem</span>${fmtMoney(totals.perDiemTotal, p.perDiemCurrency || 'EUR')}</td>
+              </tr>` : ''}
+              <tr>
+                <td colspan="4">Grand Total</td>
+                <td class="report-total-cell"><span class="report-total-label">Hours</span>${totals.hours}h</td>
+                <td class="report-total-cell"><span class="report-total-label">Overtime</span>${totals.overtime}h</td>
+                <td class="report-total-cell"><span class="report-total-label">Short Rest</span>${totals.restViolation}h</td>
+                <td class="report-total-cell"><span class="report-total-label">Day Rate</span>${fmtMoney(totals.dayRateValue, p.currency)}</td>
+                <td class="report-total-cell" colspan="3"><span class="report-total-label">All OT Pay</span>${fmtMoney(totals.ot25 + totals.ot50 + totals.ot100, p.currency)}</td>
+                <td class="report-total-cell"><span class="report-total-label">Short Rest Pay</span>${fmtMoney(totals.restPay, p.currency)}</td>
+                <td class="report-total-cell" ${p.perDiemEnabled ? 'colspan="3"' : ''}><span class="report-total-label">Final Total</span>${fmtMoney(totals.payTotal, p.currency)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>`;
+    el('report-overlay').classList.add('open');
+    el('btn-export-report').addEventListener('click',()=>exportReportCsv(p, rows, totals));
+    el('btn-close-report').addEventListener('click', closeReport);
+  }
+
+  function csvCell(value){
+    const text = value == null ? '' : String(value);
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  function exportReportCsv(project, rows, totals){
+    const payCurrency = project.currency || 'THB';
+    const perDiemCurrency = project.perDiemCurrency || 'EUR';
+    const header = ['Date','Day','Type','Start','End','Break (min)','Hours','Overtime','Short Rest','Day Rate','OT +25%','OT +50%','OT +100%','Short Rest +50%'];
+    if(project.perDiemEnabled) header.push('Per Diem', 'Meals');
+    header.push('Total');
+
+    const csvRows = [header];
+
+    rows.forEach(r=>{
+      const row = [
+        r.date,
+        r.dayName,
+        r.type,
+        r.start || '',
+        r.end || '',
+        r.breakMins === '' ? '' : r.breakMins,
+        r.hours === '' ? '' : r.hours,
+        r.overtime === '' ? '' : r.overtime,
+        r.restViolation === '' ? '' : r.restViolation,
+        fmtMoney(r.dayRateValue || 0, payCurrency),
+        fmtMoney(r.ot25, payCurrency),
+        fmtMoney(r.ot50, payCurrency),
+        fmtMoney(r.ot100, payCurrency),
+        fmtMoney(r.restPay, payCurrency)
+      ];
+      if(project.perDiemEnabled) row.push(fmtMoney(r.perDiemTotal, perDiemCurrency), r.meals || '');
+      row.push(fmtMoney(r.payTotal, payCurrency));
+      csvRows.push(row);
+    });
+
+    csvRows.push([]);
+    if(project.perDiemEnabled){
+      csvRows.push(['Per Diem','','','','','','','','','','','','','', fmtMoney(totals.perDiemTotal, perDiemCurrency), '', '']);
+    }
+
+    const grandTotalRow = ['Grand Total','','','','', totals.hours, totals.overtime, totals.restViolation, fmtMoney(totals.dayRateValue, payCurrency), fmtMoney(totals.ot25, payCurrency), fmtMoney(totals.ot50, payCurrency), fmtMoney(totals.ot100, payCurrency), fmtMoney(totals.restPay, payCurrency)];
+    if(project.perDiemEnabled) grandTotalRow.push('', '');
+    grandTotalRow.push(fmtMoney(totals.payTotal, payCurrency));
+    csvRows.push(grandTotalRow);
+
+    const csv = csvRows.map(row=>row.map(csvCell).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const safeName = (project.name || 'report').replace(/[^\w.-]+/g, '_');
+    link.href = url;
+    link.download = `${safeName || 'report'}-detailed-report.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function closeReport(){
+    el('report-overlay').classList.remove('open');
+  }
+
+  function openConfirmDialog({ title, message, confirmLabel='Confirm', onConfirm, danger=false }){
+    const overlay = el('confirm-overlay');
+    const dialog = el('confirm-dialog');
+    dialog.innerHTML = `
+      <div class="confirm-title">${title}</div>
+      <div class="confirm-text">${message}</div>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="btn-confirm-cancel" type="button">Cancel</button>
+        <button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" id="btn-confirm-accept" type="button">${confirmLabel}</button>
+      </div>`;
+    overlay.classList.add('open');
+    el('btn-confirm-cancel').addEventListener('click', closeConfirmDialog);
+    el('btn-confirm-accept').addEventListener('click',()=>{
+      closeConfirmDialog();
+      if(typeof onConfirm === 'function') onConfirm();
+    });
+  }
+
+  function closeConfirmDialog(){
+    el('confirm-overlay').classList.remove('open');
+    el('confirm-dialog').innerHTML = '';
+  }
+
 
   // ── Settings ──
   function openSettings(id){
@@ -718,7 +1040,7 @@
         <div class="field"><label>End Date</label><input type="date" id="s-to" value="${p.dateTo}"></div>
       </div>
       <div class="fields-row">
-        <div class="field"><label>Daily Rate</label><input type="number" id="s-rate" value="${p.rate}" placeholder="3000"></div>
+        <div class="field"><label>Daily Rate</label><input type="number" id="s-rate" value="${p.rate}" placeholder=""></div>
         <div class="field"><label>Currency</label><input type="text" id="s-cur" value="${p.currency||'THB'}" maxlength="5"></div>
       </div>
       <div class="toggle-row">
@@ -766,10 +1088,19 @@
     projects.push(p); LS.set('wl_projects',projects); renderProjects(); openSettings(p.id);
   }
   function deleteProject(id){
-    if(!confirm('Delete this project and all its logged hours?')) return;
-    projects=projects.filter(p=>p.id!==id);
-    if(pid===id){pid=null;pday=null;}
-    LS.set('wl_projects',projects); renderProjects(); goTo('layer-projects');
+    const project = normalizeProject(projects.find(p=>p.id===id));
+    if(!project) return;
+    openConfirmDialog({
+      title: 'Delete project?',
+      message: `This will permanently remove ${project.name} and all its logged hours.`,
+      confirmLabel: 'Delete Project',
+      danger: true,
+      onConfirm: ()=>{
+        projects=projects.filter(p=>p.id!==id);
+        if(pid===id){pid=null;pday=null;}
+        LS.set('wl_projects',projects); renderProjects(); goTo('layer-projects');
+      }
+    });
   }
   function clearDay(){
     if(!pid||!pday) return;
@@ -777,30 +1108,6 @@
     LS.setSess(pid,pday,null); renderDay(); renderDays();
   }
 
-  // ── Seed test data ──
-  function seedTestData(){
-    // Find or create test project
-    let p=projects.find(x=>x.name==='Backtest March');
-    if(!p){
-      p={id:uid(),name:'Backtest March',dateFrom:'2025-03-23',dateTo:'2025-03-30',rate:'3000',currency:'THB',perDiemEnabled:false,perDiemAmount:'',perDiemCurrency:'EUR'};
-      projects.push(p); LS.set('wl_projects',projects);
-    }
-    const testDays=[
-      {date:'2025-03-23',start:'08:45',end:'18:30',breakMins:30},
-      {date:'2025-03-24',start:'11:50',end:'22:15',breakMins:30},
-      {date:'2025-03-25',start:'09:00',end:'17:00',breakMins:60},
-      {date:'2025-03-26',start:'09:10',end:'19:25',breakMins:60},
-      {date:'2025-03-27',start:'17:50',end:'23:15',breakMins:60},
-      {date:'2025-03-28',start:'09:40',end:'19:15',breakMins:60},
-      {date:'2025-03-29',start:'13:05',end:'22:10',breakMins:60},
-      {date:'2025-03-30',start:'09:10',end:'18:30',breakMins:60},
-    ];
-    const all=LS.get('wl_s',{});
-    if(!all[p.id]) all[p.id]={};
-    testDays.forEach(d=>{all[p.id][d.date]={start:d.start,end:d.end,breakMins:d.breakMins,dayType:'work'};});
-    LS.set('wl_s',all);
-    return p.id;
-  }
 
   // ── Init ──
   function init(){
@@ -811,17 +1118,15 @@
     }
     projects=projects.map(normalizeProject);
     LS.set('wl_projects',projects);
-    // Seed test data if not already present
-    const testProjId=seedTestData();
 
     el('btn-back-proj').addEventListener('click',()=>{goTo('layer-projects');renderProjects();});
     el('btn-back-days').addEventListener('click',()=>{goTo('layer-days');renderDays();});
     el('btn-settings').addEventListener('click',()=>{if(pid)openSettings(pid);});
     el('btn-clear-day').addEventListener('click',clearDay);
+    el('report-overlay').addEventListener('click',e=>{ if(e.target===el('report-overlay')) closeReport(); });
+    el('confirm-overlay').addEventListener('click',e=>{ if(e.target===el('confirm-overlay')) closeConfirmDialog(); });
 
     renderProjects();
-    // Auto-open the test project for convenience
-    openProject(testProjId);
   }
 
   document.addEventListener('DOMContentLoaded',init);
