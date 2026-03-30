@@ -85,6 +85,7 @@
     .chips { display: grid; gap: 8px; }
     .chips-3 { grid-template-columns: repeat(3,1fr); }
     .chips-4 { grid-template-columns: repeat(4,1fr); }
+    .chips-5 { grid-template-columns: repeat(5,1fr); }
     .chip { background: var(--surface2); border-radius: 10px; padding: 11px 6px; text-align: center; }
     .chip .cv { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; }
     .chip .cl { font-size: 0.6rem; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.07em; }
@@ -127,6 +128,36 @@
     .field input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
     .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .fields-col { display: flex; flex-direction: column; gap: 10px; }
+    .field-note { font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
+
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .toggle-copy { display: flex; flex-direction: column; gap: 3px; }
+    .toggle-title { font-size: 0.8rem; font-weight: 700; }
+    .toggle-sub { font-size: 0.72rem; color: var(--muted); }
+    .switch {
+      position: relative; width: 48px; height: 28px; border: none; cursor: pointer;
+      border-radius: 999px; background: var(--border); transition: background 0.18s ease;
+      flex-shrink: 0;
+    }
+    .switch::after {
+      content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px;
+      border-radius: 50%; background: #fff; transition: transform 0.18s ease;
+    }
+    .switch.on { background: var(--accent); }
+    .switch.on::after { transform: translateX(20px); }
+    .meal-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .meal-btn {
+      border: 1px solid var(--border); background: var(--surface2); color: var(--muted);
+      border-radius: 10px; padding: 11px 10px; text-align: left; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .meal-btn.on { border-color: var(--accent); color: var(--text); background: rgba(240,192,64,0.1); }
+    .meal-name { font-size: 0.76rem; font-weight: 700; }
+    .meal-share { font-size: 0.68rem; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
 
     /* Day type toggle */
     .day-type-row { display: flex; gap: 8px; }
@@ -252,6 +283,27 @@
   const fmtDate  = d => d.slice(8,10)+'-'+d.slice(5,7);
   const weekend  = d => { const w=new Date(d+'T12:00:00').getDay(); return w===0||w===6; };
   const fmtMoney = (n,c) => (+n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+(c||'');
+  const mealRates = { breakfast: 0.2, lunch: 0.4, dinner: 0.4 };
+
+  function normalizeProject(p){
+    if(!p) return p;
+    p.currency = (p.currency || 'THB').toUpperCase();
+    p.perDiemEnabled = !!p.perDiemEnabled;
+    p.perDiemAmount = p.perDiemAmount ?? '';
+    p.perDiemCurrency = (p.perDiemCurrency || 'EUR').toUpperCase();
+    return p;
+  }
+
+  function normalizeSession(s){
+    return {
+      ...s,
+      meals: {
+        breakfast: !!s?.meals?.breakfast,
+        lunch: !!s?.meals?.lunch,
+        dinner: !!s?.meals?.dinner
+      }
+    };
+  }
 
   function dateRange(from,to){
     const days=[],d=new Date(from+'T12:00:00'),e=new Date(to+'T12:00:00');
@@ -274,6 +326,15 @@
   }
 
   function calcOT(h){ return Math.max(0, h - 10); }
+
+  function calcPerDiemMeals(amount, meals){
+    const base = parseFloat(amount) || 0;
+    if(!base || !meals) return { breakfast:0, lunch:0, dinner:0, total:0 };
+    const breakfast = meals.breakfast ? base * mealRates.breakfast : 0;
+    const lunch = meals.lunch ? base * mealRates.lunch : 0;
+    const dinner = meals.dinner ? base * mealRates.dinner : 0;
+    return { breakfast, lunch, dinner, total: breakfast + lunch + dinner };
+  }
 
   // Rest gap in hours between prev day end → this day start. Returns hours or null.
   function restGap(date, start, sessions){
@@ -320,14 +381,15 @@
   }
 
   function summary(projId){
-    const p=projects.find(x=>x.id===projId);
-    if(!p) return {daysWorked:0,totalOT:0,totalPay:0,totalRestViol:0};
+    const p=normalizeProject(projects.find(x=>x.id===projId));
+    if(!p) return {daysWorked:0,totalOT:0,totalPay:0,totalRestViol:0,totalPerDiem:0};
     const sess=LS.allSess(projId);
-    let daysWorked=0, totalOT=0, totalPay=0, totalRestViol=0;
+    let daysWorked=0, totalOT=0, totalPay=0, totalRestViol=0, totalPerDiem=0;
     const dates=Object.keys(sess).sort();
     for(const d of dates){
-      const s=sess[d];
+      const s=normalizeSession(sess[d]);
       const dtype=s.dayType||'work';
+      totalPerDiem += calcPerDiemMeals(p.perDiemAmount, s.meals).total;
       if(dtype==='off'||dtype==='travel'){
         daysWorked++;
         totalPay+=calcDayPay(0,parseFloat(p.rate)||0,0,dtype).total;
@@ -338,9 +400,12 @@
       totalOT+=calcOT(h);
       const rv=restViolHours(d,s.start,sess);
       totalRestViol+=Math.ceil(rv);
-      totalPay+=calcDayPay(h,parseFloat(p.rate)||0,rv,dtype).total;
+      let dayPay=calcDayPay(h,parseFloat(p.rate)||0,rv,dtype).total;
+      const rate=parseFloat(p.rate)||0;
+      if(dtype==='work' && h < 10 && h > 0 && dayPay < rate) dayPay = rate;
+      totalPay+=dayPay;
     }
-    return {daysWorked,totalOT,totalPay,totalRestViol};
+    return {daysWorked,totalOT,totalPay,totalRestViol,totalPerDiem};
   }
 
   // ── Layer nav ──
@@ -363,7 +428,8 @@
       e.innerHTML='<div class="ei">📋</div><p>No projects yet. Add one below.</p>';
       body.appendChild(e);
     } else {
-      projects.forEach(p=>{
+      projects.forEach(raw=>{
+        const p=normalizeProject(raw);
         const s=summary(p.id);
         const item=document.createElement('div'); item.className='proj-item';
         item.innerHTML=`
@@ -393,7 +459,7 @@
   function openProject(id){ pid=id; pday=null; renderDays(); goTo('layer-days'); }
 
   function renderDays(){
-    const p=curP(); if(!p) return;
+    const p=normalizeProject(curP()); if(!p) return;
     el('days-title').textContent=p.name;
     const body=el('days-body'); body.innerHTML='';
 
@@ -413,7 +479,7 @@
     const list=document.createElement('div'); list.className='days-list';
 
     days.forEach(date=>{
-      const sess=sessions[date];
+      const sess=sessions[date] ? normalizeSession(sessions[date]) : null;
       const dtype=sess?.dayType||'work';
       const isOff=dtype==='off'||dtype==='travel';
       const h=(!isOff&&sess)?calcH(date,sess.start,sess.end,sess.breakMins):null;
@@ -454,9 +520,10 @@
     const s=summary(p.id);
     const sumCard=document.createElement('div'); sumCard.className='card';
     sumCard.innerHTML=`<div class="card-label">Summary</div>
-      <div class="chips chips-4">
+      <div class="chips ${p.perDiemEnabled ? 'chips-5' : 'chips-4'}">
         <div class="chip"><div class="cv">${s.daysWorked}</div><div class="cl">Days</div></div>
         <div class="chip ya"><div class="cv">${fmtMoney(s.totalPay,p.currency||'THB')}</div><div class="cl">Pay</div></div>
+        ${p.perDiemEnabled ? `<div class="chip ya"><div class="cv">${fmtMoney(s.totalPerDiem,p.perDiemCurrency||'EUR')}</div><div class="cl">Per Diem</div></div>` : ''}
         <div class="chip yr"><div class="cv">${s.totalOT}h</div><div class="cl">OT</div></div>
         <div class="chip yr"><div class="cv">${s.totalRestViol}h</div><div class="cl">Rest</div></div>
       </div>`;
@@ -467,9 +534,9 @@
   function openDay(date){ pday=date; renderDay(); goTo('layer-day'); }
 
   function renderDay(){
-    const p=curP(); if(!p) return;
+    const p=normalizeProject(curP()); if(!p) return;
     const date=pday;
-    const sess=LS.getSess(p.id,date)||{};
+    const sess=normalizeSession(LS.getSess(p.id,date)||{});
     const dtype=sess.dayType||'work';
     el('day-title').textContent=`${dayName(date)} ${fmtDate(date)}`;
     const body=el('day-body'); body.innerHTML='';
@@ -490,7 +557,27 @@
           </div>
           <div class="field"><label>Break (min)</label><input type="number" id="d-break" value="${sess.breakMins!=null?sess.breakMins:60}" min="0" max="300" placeholder="60"></div>
         </div>
-      </div>`;
+      </div>
+      ${p.perDiemEnabled ? `
+      <div class="fields-col" style="margin-top:10px">
+        <div class="field">
+          <label>Per Diem Meals</label>
+        </div>
+        <div class="meal-grid">
+          <button class="meal-btn ${sess.meals.breakfast ? 'on' : ''}" id="meal-breakfast" type="button">
+            <div class="meal-name">Breakfast</div>
+            <div class="meal-share">20%</div>
+          </button>
+          <button class="meal-btn ${sess.meals.lunch ? 'on' : ''}" id="meal-lunch" type="button">
+            <div class="meal-name">Lunch</div>
+            <div class="meal-share">40%</div>
+          </button>
+          <button class="meal-btn ${sess.meals.dinner ? 'on' : ''}" id="meal-dinner" type="button">
+            <div class="meal-name">Dinner</div>
+            <div class="meal-share">40%</div>
+          </button>
+        </div>
+      </div>` : ''}`;
     body.appendChild(card);
 
     // ── Result card ──
@@ -514,12 +601,18 @@
     ['d-start','d-end','d-break'].forEach(id=>{
       el(id)?.addEventListener('input',()=>calcDay());
     });
+    ['breakfast','lunch','dinner'].forEach(meal=>{
+      el('meal-'+meal)?.addEventListener('click',()=>{
+        el('meal-'+meal).classList.toggle('on');
+        calcDay();
+      });
+    });
 
-    if(dtype!=='work'||(sess.start&&sess.end)) calcDay(true, dtype);
+    if(dtype!=='work'||(sess.start&&sess.end)||sess.meals.breakfast||sess.meals.lunch||sess.meals.dinner) calcDay(true, dtype);
   }
 
   function calcDay(skipSave=false, forceDtype){
-    const p=curP(); if(!p) return;
+    const p=normalizeProject(curP()); if(!p) return;
     const date=pday;
     // Read current type from button states
     const dtype = forceDtype || (['work','off','travel'].find(t=>el('dt-'+t)?.classList.contains('active-'+t))||'work');
@@ -527,33 +620,50 @@
     const end    = el('d-end')?.value||'';
     const bRaw   = parseInt(el('d-break')?.value);
     const bMins  = isNaN(bRaw)?60:bRaw;
+    const meals = {
+      breakfast: !!el('meal-breakfast')?.classList.contains('on'),
+      lunch: !!el('meal-lunch')?.classList.contains('on'),
+      dinner: !!el('meal-dinner')?.classList.contains('on')
+    };
     const res    = el('d-result'); if(!res) return;
 
     const isOff=dtype==='off'||dtype==='travel';
+    const existing = normalizeSession(LS.getSess(p.id,date)||{});
+    const hasMealSelection = meals.breakfast || meals.lunch || meals.dinner;
 
     // Save
     if(!skipSave){
       if(isOff){
-        LS.setSess(p.id,date,{dayType:dtype});
+        LS.setSess(p.id,date,{...existing,dayType:dtype,meals});
       } else if(start&&end){
-        LS.setSess(p.id,date,{start,end,breakMins:bMins,dayType:dtype});
+        LS.setSess(p.id,date,{...existing,start,end,breakMins:bMins,dayType:dtype,meals});
+      } else if(hasMealSelection){
+        LS.setSess(p.id,date,{dayType:dtype,meals});
+      } else {
+        LS.setSess(p.id,date,null);
       }
     }
 
     const rate=parseFloat(p.rate)||0;
     const sessions=LS.allSess(p.id);
     const cur=p.currency||'THB';
+    const perDiem = calcPerDiemMeals(p.perDiemAmount, meals);
+    const perDiemCur = p.perDiemCurrency || 'EUR';
 
     if(isOff){
       const pay=rate*0.5;
       res.innerHTML=`<div class="result-items">
         <div class="result-row result-total"><span class="rl">${dtype==='off'?'Day Off':'Travel Day'} (50%)</span><span class="rv accent">${fmtMoney(pay,cur)}</span></div>
+        ${p.perDiemEnabled ? `<div class="result-row"><span class="rl">Per diem meals</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>` : ''}
       </div>`;
       renderDays(); return;
     }
 
     if(!start||!end){
-      res.innerHTML='<p style="color:var(--muted);font-size:0.82rem;padding:4px 0">Enter start and end time.</p>';
+      res.innerHTML=`<div class="result-items">
+        <p style="color:var(--muted);font-size:0.82rem;padding:4px 0">Enter start and end time.</p>
+        ${p.perDiemEnabled ? `<div class="result-row"><span class="rl">Per diem meals</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>` : ''}
+      </div>`;
       return;
     }
 
@@ -583,6 +693,10 @@
     if(ot>=3) html+=`<div class="result-row"><span class="rl">13–14h (+50%)</span><span class="rv warn">${fmtMoney(Math.min(Math.max(ot-2,0),2)*hourR*1.50,cur)}</span></div>`;
     if(ot>=5) html+=`<div class="result-row"><span class="rl">&gt;14h (+100%)</span><span class="rv danger">${fmtMoney(Math.max(ot-4,0)*hourR*2.00,cur)}</span></div>`;
     if(rv>0)  html+=`<div class="result-row"><span class="rl">Rest violation (+50%)</span><span class="rv danger">${fmtMoney(Math.ceil(rv)*hourR*1.50,cur)}</span></div>`;
+    if(p.perDiemEnabled){
+      html+='<div class="result-divider"></div>';
+      html+=`<div class="result-row"><span class="rl">Per diem total</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>`;
+    }
     html+='<div class="result-divider"></div>';
     html+=`<div class="result-row result-total"><span class="rl">Day Total</span><span class="rv accent">${fmtMoney(pay.total,cur)}</span></div>`;
     html+='</div>';
@@ -593,7 +707,7 @@
 
   // ── Settings ──
   function openSettings(id){
-    pid=id; const p=curP();
+    pid=id; const p=normalizeProject(curP());
     const overlay=el('settings-overlay'); const sheet=el('settings-sheet');
     sheet.innerHTML=`
       <div class="sheet-handle"></div>
@@ -607,14 +721,37 @@
         <div class="field"><label>Daily Rate</label><input type="number" id="s-rate" value="${p.rate}" placeholder="3000"></div>
         <div class="field"><label>Currency</label><input type="text" id="s-cur" value="${p.currency||'THB'}" maxlength="5"></div>
       </div>
+      <div class="toggle-row">
+        <div class="toggle-copy">
+          <div class="toggle-title">Per diem</div>
+          <div class="toggle-sub">Enable meal-based per diem for this project.</div>
+        </div>
+        <button class="switch ${p.perDiemEnabled ? 'on' : ''}" id="s-pd-enabled" type="button" aria-pressed="${p.perDiemEnabled ? 'true' : 'false'}"></button>
+      </div>
+      <div id="s-pd-fields" style="${p.perDiemEnabled ? '' : 'display:none'}">
+        <div class="fields-row">
+          <div class="field"><label>Per Diem Amount</label><input type="number" id="s-pd-amount" value="${p.perDiemAmount}" placeholder="38"></div>
+          <div class="field"><label>Per Diem Currency</label><input type="text" id="s-pd-cur" value="${p.perDiemCurrency||'EUR'}" maxlength="5"></div>
+        </div>
+      </div>
       <button class="btn btn-primary" id="s-save">Save</button>
       <button class="btn btn-ghost" id="s-cancel">Cancel</button>`;
     overlay.classList.add('open');
+    el('s-pd-enabled').addEventListener('click',()=>{
+      const btn=el('s-pd-enabled');
+      const on=!btn.classList.contains('on');
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      el('s-pd-fields').style.display=on ? '' : 'none';
+    });
     el('s-save').addEventListener('click',()=>{
       p.name=el('s-name').value.trim()||p.name;
       p.dateFrom=el('s-from').value; p.dateTo=el('s-to').value;
       p.rate=el('s-rate').value;
       p.currency=(el('s-cur').value.trim()||'THB').toUpperCase();
+      p.perDiemEnabled=el('s-pd-enabled').classList.contains('on');
+      p.perDiemAmount=p.perDiemEnabled ? el('s-pd-amount').value : '';
+      p.perDiemCurrency=(el('s-pd-cur').value.trim()||'EUR').toUpperCase();
       LS.set('wl_projects',projects);
       closeSettings(); renderProjects(); renderDays();
     });
@@ -625,7 +762,7 @@
 
   // ── CRUD ──
   function addProject(){
-    const p={id:uid(),name:'New Project',dateFrom:'',dateTo:'',rate:'',currency:'THB'};
+    const p={id:uid(),name:'New Project',dateFrom:'',dateTo:'',rate:'',currency:'THB',perDiemEnabled:false,perDiemAmount:'',perDiemCurrency:'EUR'};
     projects.push(p); LS.set('wl_projects',projects); renderProjects(); openSettings(p.id);
   }
   function deleteProject(id){
@@ -645,7 +782,7 @@
     // Find or create test project
     let p=projects.find(x=>x.name==='Backtest March');
     if(!p){
-      p={id:uid(),name:'Backtest March',dateFrom:'2025-03-23',dateTo:'2025-03-30',rate:'3000',currency:'THB'};
+      p={id:uid(),name:'Backtest March',dateFrom:'2025-03-23',dateTo:'2025-03-30',rate:'3000',currency:'THB',perDiemEnabled:false,perDiemAmount:'',perDiemCurrency:'EUR'};
       projects.push(p); LS.set('wl_projects',projects);
     }
     const testDays=[
@@ -669,9 +806,11 @@
   function init(){
     projects=LS.get('wl_projects',null);
     if(!Array.isArray(projects)||!projects.length){
-      projects=[{id:uid(),name:'My First Project',dateFrom:'',dateTo:'',rate:'',currency:'THB'}];
+      projects=[{id:uid(),name:'My First Project',dateFrom:'',dateTo:'',rate:'',currency:'THB',perDiemEnabled:false,perDiemAmount:'',perDiemCurrency:'EUR'}];
       LS.set('wl_projects',projects);
     }
+    projects=projects.map(normalizeProject);
+    LS.set('wl_projects',projects);
     // Seed test data if not already present
     const testProjId=seedTestData();
 
