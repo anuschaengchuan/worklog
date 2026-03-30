@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorkLog</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f0f11; --surface: #18181c; --surface2: #222228; --border: #2e2e38;
+      --accent: #f0c040; --accent2: #e07040; --text: #ececec; --muted: #7a7a8a;
+      --danger: #e05060; --green: #50c878; --radius: 12px;
+      --font: 'Syne', sans-serif; --mono: 'DM Mono', monospace; --header-h: 60px;
+    }
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; }
+
+    /* ── Layers ── */
+    .layer {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      background: var(--bg);
+    }
+    .layer.active { transform: translateX(0); }
+    .layer.behind { transform: translateX(-28%); }
+    #layer-projects { transform: translateX(0); }
+
+    /* ── Topbar ── */
+    .topbar {
+      height: var(--header-h); display: flex; align-items: center; gap: 10px;
+      padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .topbar-back {
+      background: none; border: none; color: var(--accent); font-family: var(--font);
+      font-size: 0.88rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 4px; padding: 6px 0; white-space: nowrap;
+    }
+    .topbar-back svg { width: 16px; height: 16px; }
+    .topbar-title { flex: 1; font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topbar-action {
+      background: none; border: none; color: var(--muted); cursor: pointer; padding: 8px;
+      border-radius: 8px; display: flex; align-items: center;
+      transition: color 0.15s, background 0.15s; flex-shrink: 0;
+    }
+    .topbar-action:hover { color: var(--text); background: var(--surface2); }
+    .topbar-action svg { width: 19px; height: 19px; }
+
+    /* ── Body ── */
+    .layer-body { flex: 1; overflow-y: auto; padding: 14px 14px 32px; display: flex; flex-direction: column; gap: 12px; }
+
+    /* ── Project list ── */
+    .list-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 8px 4px 2px; }
+    .proj-item {
+      display: flex; align-items: center; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 15px 14px; cursor: pointer; transition: border-color 0.15s; gap: 12px;
+    }
+    .proj-item:hover { border-color: var(--accent); }
+    .proj-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .proj-info { flex: 1; min-width: 0; }
+    .proj-name { font-weight: 700; font-size: 0.93rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .proj-meta { font-size: 0.73rem; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
+    .proj-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .icon-btn { background: none; border: none; cursor: pointer; padding: 7px; border-radius: 8px; display: flex; align-items: center; transition: background 0.15s, color 0.15s; }
+    .icon-btn svg { width: 16px; height: 16px; }
+    .icon-btn.edit { color: var(--muted); }
+    .icon-btn.edit:hover { color: var(--accent); background: rgba(240,192,64,0.1); }
+    .icon-btn.del  { color: var(--muted); }
+    .icon-btn.del:hover  { color: var(--danger); background: rgba(224,80,96,0.1); }
+    .proj-arrow { color: var(--border); }
+    .proj-arrow svg { width: 15px; height: 15px; }
+    .btn-add {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: none; border: 1px dashed var(--border); color: var(--muted);
+      border-radius: var(--radius); padding: 14px; cursor: pointer; font-family: var(--font);
+      font-size: 0.88rem; font-weight: 600; transition: all 0.15s; width: 100%;
+    }
+    .btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Cards ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .card-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 12px; }
+
+    /* ── Chips ── */
+    .chips { display: grid; gap: 8px; }
+    .chips-3 { grid-template-columns: repeat(3,1fr); }
+    .chips-4 { grid-template-columns: repeat(4,1fr); }
+    .chip { background: var(--surface2); border-radius: 10px; padding: 11px 6px; text-align: center; }
+    .chip .cv { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; }
+    .chip .cl { font-size: 0.6rem; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.07em; }
+    .chip.ya .cv { color: var(--accent); }
+    .chip.yr .cv { color: var(--danger); }
+    .chip.yg .cv { color: var(--green); }
+
+    /* ── Days list ── */
+    .days-list { display: flex; flex-direction: column; gap: 7px; }
+    .day-row {
+      display: flex; align-items: center; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px; cursor: pointer; transition: border-color 0.15s; gap: 12px;
+    }
+    .day-row:hover  { border-color: var(--accent); }
+    .day-row.logged { border-color: rgba(80,200,120,0.45); }
+    .day-row.rwarn  { border-color: var(--danger); }
+    .day-row.is-off { border-color: rgba(240,192,64,0.3); opacity: 0.8; }
+    .dr-date { min-width: 50px; flex-shrink: 0; }
+    .dr-name { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .dr-num  { font-family: var(--mono); font-size: 0.92rem; margin-top: 2px; }
+    .dr-info { flex: 1; min-width: 0; }
+    .dr-times { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+    .dr-hours { font-family: var(--mono); font-size: 0.82rem; color: var(--green); }
+    .dr-ot    { font-size: 0.7rem; color: var(--accent2); }
+    .dr-rest  { font-size: 0.67rem; color: var(--danger); }
+    .dr-badge { font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: rgba(240,192,64,0.15); color: var(--accent); display: inline-block; }
+    .dr-empty { font-size: 0.78rem; color: var(--muted); }
+    .dr-arr   { color: var(--border); flex-shrink: 0; }
+    .dr-arr svg { width: 14px; height: 14px; }
+
+    /* ── Day detail ── */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .field input, .field select {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      border-radius: 8px; padding: 12px 14px; font-family: var(--mono); font-size: 1rem;
+      transition: border-color 0.2s; outline: none; width: 100%;
+    }
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+    .field input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+    .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .fields-col { display: flex; flex-direction: column; gap: 10px; }
+
+    /* Day type toggle */
+    .day-type-row { display: flex; gap: 8px; }
+    .day-type-btn {
+      flex: 1; padding: 9px 6px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--muted); font-family: var(--font);
+      font-size: 0.78rem; font-weight: 600; cursor: pointer; text-align: center;
+      transition: all 0.15s;
+    }
+    .day-type-btn.active-work  { border-color: var(--green);  color: var(--green);  background: rgba(80,200,120,0.08); }
+    .day-type-btn.active-off   { border-color: var(--accent); color: var(--accent); background: rgba(240,192,64,0.08); }
+    .day-type-btn.active-travel{ border-color: var(--accent2);color: var(--accent2);background: rgba(224,112,64,0.08); }
+
+    /* Results */
+    .result-items { display: flex; flex-direction: column; gap: 7px; }
+    .result-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 13px; background: var(--surface2); border-radius: 8px;
+    }
+    .result-row .rl { font-size: 0.76rem; color: var(--muted); }
+    .result-row .rv { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; }
+    .rv.accent { color: var(--accent); }
+    .rv.warn   { color: var(--accent2); }
+    .rv.danger { color: var(--danger); }
+    .rv.green  { color: var(--green); }
+    .result-divider { height: 1px; background: var(--border); margin: 2px 0; }
+    .result-total { font-weight: 700; }
+    .result-total .rl { color: var(--text); font-size: 0.82rem; }
+    .result-total .rv { color: var(--accent); font-size: 1rem; }
+
+    .notice {
+      padding: 10px 13px; border-radius: 8px; font-size: 0.78rem;
+      border-left: 3px solid var(--danger); background: rgba(224,80,96,0.08); color: var(--text);
+    }
+
+    /* ── Settings sheet ── */
+    #settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 200; display: none; align-items: flex-end; }
+    #settings-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from{opacity:0}to{opacity:1} }
+    .settings-sheet {
+      width: 100%; background: var(--surface); border-radius: 20px 20px 0 0;
+      padding: 18px 18px 40px; display: flex; flex-direction: column; gap: 12px;
+      animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1); max-height: 88vh; overflow-y: auto;
+    }
+    @keyframes slideUp { from{transform:translateY(100%)}to{transform:translateY(0)} }
+    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 4px; }
+    .sheet-title { font-size: 1.1rem; font-weight: 800; }
+    .btn {
+      padding: 13px; border-radius: 10px; border: none; cursor: pointer; font-family: var(--font);
+      font-weight: 700; font-size: 0.88rem; transition: all 0.15s; width: 100%; text-align: center;
+    }
+    .btn-primary { background: var(--accent); color: #111; }
+    .btn-primary:hover { background: #ffd060; }
+    .btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted); text-align: center; padding: 48px 20px; }
+    .empty-state .ei { font-size: 2.8rem; }
+    .empty-state p { font-size: 0.88rem; line-height: 1.6; max-width: 260px; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- LAYER 0: Projects -->
+<div class="layer" id="layer-projects">
+  <div class="topbar"><div class="topbar-title">⏱ WorkLog</div></div>
+  <div class="layer-body" id="proj-body"></div>
+</div>
+
+<!-- LAYER 1: Days -->
+<div class="layer" id="layer-days">
+  <div class="topbar">
+    <button class="topbar-back" id="btn-back-proj">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Projects
+    </button>
+    <div class="topbar-title" id="days-title"></div>
+    <button class="topbar-action" id="btn-settings" title="Project settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+  <div class="layer-body" id="days-body"></div>
+</div>
+
+<!-- LAYER 2: Day detail -->
+<div class="layer" id="layer-day">
+  <div class="topbar">
+    <button class="topbar-back" id="btn-back-days">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Days
+    </button>
+    <div class="topbar-title" id="day-title"></div>
+    <button class="topbar-action" id="btn-clear-day" title="Clear this day">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+    </button>
+  </div>
+  <div class="layer-body" id="day-body"></div>
+</div>
+
+<!-- Settings sheet -->
+<div id="settings-overlay"><div class="settings-sheet" id="settings-sheet"></div></div>
+
+<script>
+(() => {
+  let projects = [];
+  let pid  = null;
+  let pday = null;
+
+  // ── Storage ──
+  const LS = {
+    get(k,d){ try{return JSON.parse(localStorage.getItem(k))??d}catch{return d} },
+    set(k,v){ localStorage.setItem(k,JSON.stringify(v)) },
+    getSess(p,d){ const a=this.get('wl_s',{}); return a[p]?.[d]||null },
+    setSess(p,d,v){ const a=this.get('wl_s',{}); if(!a[p])a[p]={}; v===null?delete a[p][d]:a[p][d]=v; this.set('wl_s',a) },
+    allSess(p){ return this.get('wl_s',{})[p]||{} }
+  };
+
+  // ── Util ──
+  const uid  = () => Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const el   = id => document.getElementById(id);
+  const curP = () => projects.find(p=>p.id===pid)||null;
+  const dayName  = d => new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});
+  const fmtDate  = d => d.slice(8,10)+'-'+d.slice(5,7);
+  const weekend  = d => { const w=new Date(d+'T12:00:00').getDay(); return w===0||w===6; };
+  const fmtMoney = (n,c) => (+n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+(c||'');
+
+  function dateRange(from,to){
+    const days=[],d=new Date(from+'T12:00:00'),e=new Date(to+'T12:00:00');
+    while(d<=e){days.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}
+    return days;
+  }
+
+  // ── Calculations ──
+  // Raw minutes at work → add back missing break → ceil to next full hour
+  function calcH(date, start, end, bMins){
+    if(!date||!start||!end) return null;
+    const s=new Date(`${date}T${start}`); let e=new Date(`${date}T${end}`);
+    if(e<=s) e.setDate(e.getDate()+1);
+    const rawMin = (e-s)/60000;                          // total minutes at site
+    const bk     = typeof bMins==='number' ? bMins : 60;
+    const missing = Math.max(0, 60 - bk);                // break deficit vs 60min standard
+    const netMin  = rawMin + missing;                     // net working minutes (break deficit added back)
+    const netH    = netMin / 60;
+    return Math.ceil(netH);                               // always round UP to next full hour
+  }
+
+  function calcOT(h){ return Math.max(0, h - 10); }
+
+  // Rest gap in hours between prev day end → this day start. Returns hours or null.
+  function restGap(date, start, sessions){
+    const p=curP(); if(!p||!p.dateFrom||!p.dateTo) return null;
+    const days=dateRange(p.dateFrom,p.dateTo);
+    const idx=days.indexOf(date); if(idx<=0) return null;
+    const prev=sessions[days[idx-1]];
+    if(!prev?.end) return null;
+    let pe=new Date(`${days[idx-1]}T${prev.end}`);
+    const ts=new Date(`${date}T${start}`);
+    if(ts<=pe) pe.setDate(pe.getDate()-1);
+    const gap=(ts-pe)/3600000;
+    return gap;
+  }
+
+  // Returns hours of rest violation (how much BELOW 11h). 0 if ok.
+  function restViolHours(date, start, sessions){
+    const gap=restGap(date,start,sessions);
+    if(gap===null) return 0;
+    return Math.max(0, 11 - gap);
+  }
+
+  // Pay calculation for a single day
+  // dayType: 'work' | 'off' | 'travel'  → off/travel = 50% day rate flat, no OT
+  function calcDayPay(h, rate, restViolH, dayType){
+    if(!rate) return {base:0, ot25:0, ot50:0, ot100:0, restPen:0, total:0};
+    const r = parseFloat(rate);
+    if(!r) return {base:0,ot25:0,ot50:0,ot100:0,restPen:0,total:0};
+
+    if(dayType==='off'||dayType==='travel'){
+      const flat = r * 0.5;
+      return {base:flat, ot25:0, ot50:0, ot100:0, restPen:0, total:flat, isFlat:true};
+    }
+
+    const hourRate = r / 10; // 1/10 of daily rate per normal hour
+    const normal   = Math.min(h, 10) * hourRate;
+    const ot25     = Math.max(0, Math.min(h-10, 2)) * hourRate * 1.25;
+    const ot50     = Math.max(0, Math.min(h-12, 2)) * hourRate * 1.50;
+    const ot100    = Math.max(0, h-14)              * hourRate * 2.00;
+    // Rest violation: each full hour below 11h rest → +50% of hourRate
+    const restPen  = Math.ceil(restViolH) * hourRate * 1.50;
+    const total    = normal + ot25 + ot50 + ot100 + restPen;
+    return {base:normal, ot25, ot50, ot100, restPen, total};
+  }
+
+  function summary(projId){
+    const p=projects.find(x=>x.id===projId);
+    if(!p) return {daysWorked:0,totalOT:0,totalPay:0,totalRestViol:0};
+    const sess=LS.allSess(projId);
+    let daysWorked=0, totalOT=0, totalPay=0, totalRestViol=0;
+    const dates=Object.keys(sess).sort();
+    for(const d of dates){
+      const s=sess[d];
+      const dtype=s.dayType||'work';
+      if(dtype==='off'||dtype==='travel'){
+        daysWorked++;
+        totalPay+=calcDayPay(0,parseFloat(p.rate)||0,0,dtype).total;
+        continue;
+      }
+      const h=calcH(d,s.start,s.end,s.breakMins); if(h==null) continue;
+      daysWorked++;
+      totalOT+=calcOT(h);
+      const rv=restViolHours(d,s.start,sess);
+      totalRestViol+=Math.ceil(rv);
+      totalPay+=calcDayPay(h,parseFloat(p.rate)||0,rv,dtype).total;
+    }
+    return {daysWorked,totalOT,totalPay,totalRestViol};
+  }
+
+  // ── Layer nav ──
+  const LAYERS=['layer-projects','layer-days','layer-day'];
+  function goTo(id){
+    const ti=LAYERS.indexOf(id);
+    LAYERS.forEach((lid,i)=>{
+      const l=el(lid); l.classList.remove('active','behind');
+      if(i<ti) l.classList.add('behind');
+      else if(i===ti) l.classList.add('active');
+    });
+  }
+
+  // ── Layer 0 ──
+  function renderProjects(){
+    const body=el('proj-body'); body.innerHTML='';
+    body.appendChild(Object.assign(document.createElement('div'),{className:'list-label',textContent:'Your Projects'}));
+    if(!projects.length){
+      const e=document.createElement('div'); e.className='empty-state';
+      e.innerHTML='<div class="ei">📋</div><p>No projects yet. Add one below.</p>';
+      body.appendChild(e);
+    } else {
+      projects.forEach(p=>{
+        const s=summary(p.id);
+        const item=document.createElement('div'); item.className='proj-item';
+        item.innerHTML=`
+          <div class="proj-dot"></div>
+          <div class="proj-info">
+            <div class="proj-name">${p.name}</div>
+            <div class="proj-meta">${p.dateFrom&&p.dateTo?fmtDate(p.dateFrom)+' → '+fmtDate(p.dateTo):'No dates set'}${s.daysWorked?' · '+s.daysWorked+'d':''}</div>
+          </div>
+          <div class="proj-actions">
+            <button class="icon-btn edit" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="icon-btn del"  title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+            <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+          </div>`;
+        item.querySelector('.edit').addEventListener('click',e=>{e.stopPropagation();openSettings(p.id);});
+        item.querySelector('.del').addEventListener('click', e=>{e.stopPropagation();deleteProject(p.id);});
+        item.addEventListener('click',()=>openProject(p.id));
+        body.appendChild(item);
+      });
+    }
+    const add=document.createElement('button'); add.className='btn-add';
+    add.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Project';
+    add.addEventListener('click',addProject);
+    body.appendChild(add);
+  }
+
+  // ── Layer 1 ──
+  function openProject(id){ pid=id; pday=null; renderDays(); goTo('layer-days'); }
+
+  function renderDays(){
+    const p=curP(); if(!p) return;
+    el('days-title').textContent=p.name;
+    const body=el('days-body'); body.innerHTML='';
+
+    // Days list first, then summary
+
+    if(!p.dateFrom||!p.dateTo){
+      const n=document.createElement('div'); n.className='notice';
+      n.style.borderColor='var(--green)'; n.style.background='rgba(80,200,120,0.06)';
+      n.textContent='No date range set. Tap ⚙ to configure this project.';
+      body.appendChild(n); return;
+    }
+
+    const sessions=LS.allSess(p.id);
+    const days=dateRange(p.dateFrom,p.dateTo);
+    const listCard=document.createElement('div'); listCard.className='card';
+    listCard.innerHTML='<div class="card-label">Days</div>';
+    const list=document.createElement('div'); list.className='days-list';
+
+    days.forEach(date=>{
+      const sess=sessions[date];
+      const dtype=sess?.dayType||'work';
+      const isOff=dtype==='off'||dtype==='travel';
+      const h=(!isOff&&sess)?calcH(date,sess.start,sess.end,sess.breakMins):null;
+      const ot=h!=null?calcOT(h):0;
+      // Show rest violation as text, but do not mark with red border
+      const rv=(!isOff&&sess?.start)?restViolHours(date,sess.start,sessions):0;
+      const logged=sess&&(isOff||(sess.start&&sess.end));
+
+      const row=document.createElement('div');
+      row.className='day-row'+(logged?' logged':'')+(isOff?' is-off':'');
+
+      let info='';
+      if(isOff){
+        info=`<div class="dr-badge">${dtype==='off'?'Day Off':'Travel'}</div>`;
+      } else if(logged){
+        // Start-End time bigger, all info in one small line
+        let details = `${h}h`;
+        if(ot>0) details += ` · <span style=\"color:var(--accent2)\">${ot}h OT</span>`;
+        if(rv>0) details += ` · <span class=\"dr-rest\">⚠ ${Math.ceil(rv)}h rest deficit</span>`;
+        info = `<div class=\"dr-times\" style=\"font-size:1rem;font-weight:600;\">${sess.start} – ${sess.end}</div>`
+             + `<div class=\"dr-hours\" style=\"font-size:0.78rem;color:var(--muted);font-weight:400;\">${details}</div>`;
+      } else {
+        info='<div class="dr-empty">Tap to log</div>';
+      }
+
+      row.innerHTML=`
+        <div class="dr-date"><div class="dr-name">${dayName(date)}</div><div class="dr-num">${fmtDate(date)}</div></div>
+        <div class="dr-info">${info}</div>
+        <div class="dr-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>`;
+      row.addEventListener('click',()=>openDay(date));
+      list.appendChild(row);
+    });
+
+    listCard.appendChild(list);
+    body.appendChild(listCard);
+
+    // Now add summary below
+    const s=summary(p.id);
+    const sumCard=document.createElement('div'); sumCard.className='card';
+    sumCard.innerHTML=`<div class="card-label">Summary</div>
+      <div class="chips chips-4">
+        <div class="chip"><div class="cv">${s.daysWorked}</div><div class="cl">Days</div></div>
+        <div class="chip ya"><div class="cv">${fmtMoney(s.totalPay,p.currency||'THB')}</div><div class="cl">Pay</div></div>
+        <div class="chip yr"><div class="cv">${s.totalOT}h</div><div class="cl">OT</div></div>
+        <div class="chip yr"><div class="cv">${s.totalRestViol}h</div><div class="cl">Rest</div></div>
+      </div>`;
+    body.appendChild(sumCard);
+  }
+
+  // ── Layer 2 ──
+  function openDay(date){ pday=date; renderDay(); goTo('layer-day'); }
+
+  function renderDay(){
+    const p=curP(); if(!p) return;
+    const date=pday;
+    const sess=LS.getSess(p.id,date)||{};
+    const dtype=sess.dayType||'work';
+    el('day-title').textContent=`${dayName(date)} ${fmtDate(date)}`;
+    const body=el('day-body'); body.innerHTML='';
+
+    // ── Input card ──
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML=`
+      <div class="day-type-row">
+        <button class="day-type-btn ${dtype==='work'?'active-work':''}"   id="dt-work">Work</button>
+        <button class="day-type-btn ${dtype==='off'?'active-off':''}"    id="dt-off">Day Off</button>
+        <button class="day-type-btn ${dtype==='travel'?'active-travel':''}" id="dt-travel">Travel</button>
+      </div>
+      <div id="time-fields" style="${dtype!=='work'?'display:none':''}">
+        <div class="fields-col" style="margin-top:10px">
+          <div class="fields-row">
+            <div class="field"><label>Start</label><input type="time" id="d-start" value="${sess.start||''}"></div>
+            <div class="field"><label>End</label><input type="time" id="d-end" value="${sess.end||''}"></div>
+          </div>
+          <div class="field"><label>Break (min)</label><input type="number" id="d-break" value="${sess.breakMins!=null?sess.breakMins:60}" min="0" max="300" placeholder="60"></div>
+        </div>
+      </div>`;
+    body.appendChild(card);
+
+    // ── Result card ──
+    const resCard=document.createElement('div'); resCard.className='card';
+    resCard.innerHTML='<div id="d-result"></div>';
+    body.appendChild(resCard);
+
+    // Wire day-type buttons
+    function setType(t){
+      ['work','off','travel'].forEach(x=>{
+        el('dt-'+x).className='day-type-btn'+(t===x?' active-'+x:'');
+      });
+      el('time-fields').style.display=t==='work'?'':'none';
+      calcDay(false, t);
+    }
+    el('dt-work').addEventListener('click',()=>setType('work'));
+    el('dt-off').addEventListener('click',()=>setType('off'));
+    el('dt-travel').addEventListener('click',()=>setType('travel'));
+
+    // Wire time inputs
+    ['d-start','d-end','d-break'].forEach(id=>{
+      el(id)?.addEventListener('input',()=>calcDay());
+    });
+
+    if(dtype!=='work'||(sess.start&&sess.end)) calcDay(true, dtype);
+  }
+
+  function calcDay(skipSave=false, forceDtype){
+    const p=curP(); if(!p) return;
+    const date=pday;
+    // Read current type from button states
+    const dtype = forceDtype || (['work','off','travel'].find(t=>el('dt-'+t)?.classList.contains('active-'+t))||'work');
+    const start  = el('d-start')?.value||'';
+    const end    = el('d-end')?.value||'';
+    const bRaw   = parseInt(el('d-break')?.value);
+    const bMins  = isNaN(bRaw)?60:bRaw;
+    const res    = el('d-result'); if(!res) return;
+
+    const isOff=dtype==='off'||dtype==='travel';
+
+    // Save
+    if(!skipSave){
+      if(isOff){
+        LS.setSess(p.id,date,{dayType:dtype});
+      } else if(start&&end){
+        LS.setSess(p.id,date,{start,end,breakMins:bMins,dayType:dtype});
+      }
+    }
+
+    const rate=parseFloat(p.rate)||0;
+    const sessions=LS.allSess(p.id);
+    const cur=p.currency||'THB';
+
+    if(isOff){
+      const pay=rate*0.5;
+      res.innerHTML=`<div class="result-items">
+        <div class="result-row result-total"><span class="rl">${dtype==='off'?'Day Off':'Travel Day'} (50%)</span><span class="rv accent">${fmtMoney(pay,cur)}</span></div>
+      </div>`;
+      renderDays(); return;
+    }
+
+    if(!start||!end){
+      res.innerHTML='<p style="color:var(--muted);font-size:0.82rem;padding:4px 0">Enter start and end time.</p>';
+      return;
+    }
+
+    const h   = calcH(date,start,end,bMins);
+    const ot  = calcOT(h);
+    const rv  = restViolHours(date,start,sessions);
+    let pay = calcDayPay(h,rate,rv,dtype);
+    const hourR = rate/10;
+
+    // Ensure day total is at least the day rate if worked less than 10h
+    if(dtype==='work' && h < 10 && h > 0 && pay.total < rate){
+      pay.total = rate;
+      pay.base = rate;
+      pay.ot25 = 0;
+      pay.ot50 = 0;
+      pay.ot100 = 0;
+      pay.restPen = 0;
+    }
+
+    let html='<div class="result-items">';
+    html+=`<div class="result-row"><span class="rl">Total Hours</span><span class="rv accent">${h}h</span></div>`;
+    html+=`<div class="result-row"><span class="rl">Overtime</span><span class="rv ${ot>0?'warn':'green'}">${ot}h</span></div>`;
+    if(rv>0) html+=`<div class="result-row"><span class="rl">Rest deficit</span><span class="rv danger">${Math.ceil(rv)}h (&lt;11h rest)</span></div>`;
+    html+='<div class="result-divider"></div>';
+    html+=`<div class="result-row"><span class="rl">Day rate (10h)</span><span class="rv">${fmtMoney(rate,cur)}</span></div>`;
+    if(ot>=1) html+=`<div class="result-row"><span class="rl">11–12h (+25%)</span><span class="rv warn">${fmtMoney(Math.min(ot,2)*hourR*1.25,cur)}</span></div>`;
+    if(ot>=3) html+=`<div class="result-row"><span class="rl">13–14h (+50%)</span><span class="rv warn">${fmtMoney(Math.min(Math.max(ot-2,0),2)*hourR*1.50,cur)}</span></div>`;
+    if(ot>=5) html+=`<div class="result-row"><span class="rl">&gt;14h (+100%)</span><span class="rv danger">${fmtMoney(Math.max(ot-4,0)*hourR*2.00,cur)}</span></div>`;
+    if(rv>0)  html+=`<div class="result-row"><span class="rl">Rest violation (+50%)</span><span class="rv danger">${fmtMoney(Math.ceil(rv)*hourR*1.50,cur)}</span></div>`;
+    html+='<div class="result-divider"></div>';
+    html+=`<div class="result-row result-total"><span class="rl">Day Total</span><span class="rv accent">${fmtMoney(pay.total,cur)}</span></div>`;
+    html+='</div>';
+
+    res.innerHTML=html;
+    renderDays();
+  }
+
+  // ── Settings ──
+  function openSettings(id){
+    pid=id; const p=curP();
+    const overlay=el('settings-overlay'); const sheet=el('settings-sheet');
+    sheet.innerHTML=`
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Project Settings</div>
+      <div class="field"><label>Project Name</label><input type="text" id="s-name" value="${p.name}" placeholder="Project name"></div>
+      <div class="fields-row">
+        <div class="field"><label>Start Date</label><input type="date" id="s-from" value="${p.dateFrom}"></div>
+        <div class="field"><label>End Date</label><input type="date" id="s-to" value="${p.dateTo}"></div>
+      </div>
+      <div class="fields-row">
+        <div class="field"><label>Daily Rate</label><input type="number" id="s-rate" value="${p.rate}" placeholder="3000"></div>
+        <div class="field"><label>Currency</label><input type="text" id="s-cur" value="${p.currency||'THB'}" maxlength="5"></div>
+      </div>
+      <button class="btn btn-primary" id="s-save">Save</button>
+      <button class="btn btn-ghost" id="s-cancel">Cancel</button>`;
+    overlay.classList.add('open');
+    el('s-save').addEventListener('click',()=>{
+      p.name=el('s-name').value.trim()||p.name;
+      p.dateFrom=el('s-from').value; p.dateTo=el('s-to').value;
+      p.rate=el('s-rate').value;
+      p.currency=(el('s-cur').value.trim()||'THB').toUpperCase();
+      LS.set('wl_projects',projects);
+      closeSettings(); renderProjects(); renderDays();
+    });
+    el('s-cancel').addEventListener('click',closeSettings);
+    overlay.addEventListener('click',e=>{ if(e.target===overlay) closeSettings(); });
+  }
+  function closeSettings(){ el('settings-overlay').classList.remove('open'); }
+
+  // ── CRUD ──
+  function addProject(){
+    const p={id:uid(),name:'New Project',dateFrom:'',dateTo:'',rate:'',currency:'THB'};
+    projects.push(p); LS.set('wl_projects',projects); renderProjects(); openSettings(p.id);
+  }
+  function deleteProject(id){
+    if(!confirm('Delete this project and all its logged hours?')) return;
+    projects=projects.filter(p=>p.id!==id);
+    if(pid===id){pid=null;pday=null;}
+    LS.set('wl_projects',projects); renderProjects(); goTo('layer-projects');
+  }
+  function clearDay(){
+    if(!pid||!pday) return;
+    if(!confirm('Clear this day?')) return;
+    LS.setSess(pid,pday,null); renderDay(); renderDays();
+  }
+
+  // ── Seed test data ──
+  function seedTestData(){
+    // Find or create test project
+    let p=projects.find(x=>x.name==='Backtest March');
+    if(!p){
+      p={id:uid(),name:'Backtest March',dateFrom:'2025-03-23',dateTo:'2025-03-30',rate:'3000',currency:'THB'};
+      projects.push(p); LS.set('wl_projects',projects);
+    }
+    const testDays=[
+      {date:'2025-03-23',start:'08:45',end:'18:30',breakMins:30},
+      {date:'2025-03-24',start:'11:50',end:'22:15',breakMins:30},
+      {date:'2025-03-25',start:'09:00',end:'17:00',breakMins:60},
+      {date:'2025-03-26',start:'09:10',end:'19:25',breakMins:60},
+      {date:'2025-03-27',start:'17:50',end:'23:15',breakMins:60},
+      {date:'2025-03-28',start:'09:40',end:'19:15',breakMins:60},
+      {date:'2025-03-29',start:'13:05',end:'22:10',breakMins:60},
+      {date:'2025-03-30',start:'09:10',end:'18:30',breakMins:60},
+    ];
+    const all=LS.get('wl_s',{});
+    if(!all[p.id]) all[p.id]={};
+    testDays.forEach(d=>{all[p.id][d.date]={start:d.start,end:d.end,breakMins:d.breakMins,dayType:'work'};});
+    LS.set('wl_s',all);
+    return p.id;
+  }
+
+  // ── Init ──
+  function init(){
+    projects=LS.get('wl_projects',null);
+    if(!Array.isArray(projects)||!projects.length){
+      projects=[{id:uid(),name:'My First Project',dateFrom:'',dateTo:'',rate:'',currency:'THB'}];
+      LS.set('wl_projects',projects);
+    }
+    // Seed test data if not already present
+    const testProjId=seedTestData();
+
+    el('btn-back-proj').addEventListener('click',()=>{goTo('layer-projects');renderProjects();});
+    el('btn-back-days').addEventListener('click',()=>{goTo('layer-days');renderDays();});
+    el('btn-settings').addEventListener('click',()=>{if(pid)openSettings(pid);});
+    el('btn-clear-day').addEventListener('click',clearDay);
+
+    renderProjects();
+    // Auto-open the test project for convenience
+    openProject(testProjId);
+  }
+
+  document.addEventListener('DOMContentLoaded',init);
+})();
+</script>
+</body>
+</html>
