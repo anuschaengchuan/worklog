@@ -56,10 +56,12 @@
       border-radius: var(--radius); padding: 15px 14px; cursor: pointer; transition: border-color 0.15s; gap: 12px;
     }
     .proj-item:hover { border-color: var(--cool-accent); }
-    .proj-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cool-accent); flex-shrink: 0; }
     .proj-info { flex: 1; min-width: 0; }
     .proj-name { font-weight: 700; font-size: 0.93rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .proj-meta { font-size: 0.73rem; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
+    .proj-meta-lines { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+    .proj-meta-line { font-size: 0.72rem; color: var(--muted); font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .proj-meta-total { font-size: 0.72rem; color: var(--text); font-family: var(--mono); margin-top: 2px; }
     .proj-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
     .icon-btn { background: none; border: none; cursor: pointer; padding: 7px; border-radius: 8px; display: flex; align-items: center; transition: background 0.15s, color 0.15s; }
     .icon-btn svg { width: 16px; height: 16px; }
@@ -100,7 +102,7 @@
       border-radius: 10px; padding: 11px 14px; cursor: pointer; transition: border-color 0.15s; gap: 12px;
     }
     .day-row:hover  { border-color: var(--cool-accent); }
-    .day-row.logged { border-color: rgba(80,200,120,0.45); }
+    .day-row.logged { border-color: rgba(109,190,148,0.34); }
     .day-row.rwarn  { border-color: var(--danger); }
     .day-row.is-off { border-color: rgba(88,176,196,0.32); opacity: 0.8; }
     .dr-date { min-width: 50px; flex-shrink: 0; }
@@ -130,7 +132,32 @@
     .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .fields-col { display: flex; flex-direction: column; gap: 10px; }
     .field-note { font-size: 0.76rem; color: var(--muted); line-height: 1.5; }
-
+    .range-edit-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .range-edit-row .field { flex: 1; }
+    .range-delete-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .range-delete-btn:hover {
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      border-color: var(--muted);
+    }
+    .range-delete-btn svg { width: 16px; height: 16px; }
     .toggle-row {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
       padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border);
@@ -148,7 +175,7 @@
       content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px;
       border-radius: 50%; background: #fff; transition: transform 0.18s ease;
     }
-    .switch.on { background: var(--accent); }
+    .switch.on { background: var(--muted); }
     .switch.on::after { transform: translateX(20px); }
     .meal-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
     .meal-btn {
@@ -174,20 +201,39 @@
 
     /* Results */
     .result-items { display: flex; flex-direction: column; gap: 7px; }
+    .result-pay-panel { display: none; margin-top: 7px; flex-direction: column; gap: 7px; }
+    .result-pay-panel.open { display: flex; }
+    .result-pay-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px 2px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .result-pay-toggle:hover { color: var(--text); }
+    .result-pay-toggle svg { width: 18px; height: 18px; transition: transform 0.18s ease; }
+    .result-pay-toggle.open svg { transform: rotate(180deg); }
+    .summary-panel { display: none; margin-top: 7px; flex-direction: column; gap: 7px; }
+    .summary-panel.open { display: flex; }
     .result-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 10px 13px; background: var(--surface2); border-radius: 8px;
     }
     .result-row .rl { font-size: 0.76rem; color: var(--muted); }
-    .result-row .rv { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; }
-    .rv.accent { color: var(--accent); }
-    .rv.warn   { color: var(--accent2); }
-    .rv.danger { color: var(--danger); }
-    .rv.green  { color: var(--green); }
+    .result-row .rv { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; color: #d5d8dd; }
+    .rv.accent { color: #d5d8dd; }
+    .rv.warn   { color: #d5d8dd; }
+    .rv.danger { color: #d5d8dd; }
+    .rv.green  { color: #d5d8dd; }
     .result-divider { height: 1px; background: var(--border); margin: 2px 0; }
     .result-total { font-weight: 700; }
     .result-total .rl { color: var(--text); font-size: 0.82rem; }
-    .result-total .rv { color: var(--accent); font-size: 1rem; }
+    .result-total .rv { color: #d5d8dd; font-size: 1rem; }
 
     .notice {
       padding: 10px 13px; border-radius: 8px; font-size: 0.78rem;
@@ -205,7 +251,16 @@
     }
     @keyframes slideUp { from{transform:translateY(100%)}to{transform:translateY(0)} }
     .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 4px; }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .sheet-title { font-size: 1.1rem; font-weight: 800; }
+    .sheet-icon-btn {
+      width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface2); color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .sheet-icon-btn svg { width: 17px; height: 17px; }
+    .sheet-icon-btn.danger:hover { color: var(--text); border-color: var(--muted); background: rgba(255,255,255,0.05); }
     .btn {
       padding: 13px; border-radius: 10px; border: none; cursor: pointer; font-family: var(--font);
       font-weight: 700; font-size: 0.88rem; transition: all 0.15s; width: 100%; text-align: center;
@@ -268,6 +323,8 @@
     }
     #confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 230; display: none; align-items: center; justify-content: center; padding: 18px; }
     #confirm-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    #day-picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 230; display: none; align-items: center; justify-content: center; padding: 18px; }
+    #day-picker-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
     .confirm-dialog {
       width: min(420px, 100%);
       background: var(--surface);
@@ -281,6 +338,40 @@
     .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
     .btn-danger { background: rgba(224,80,96,0.14); color: #f2a8b1; border: 1px solid rgba(224,80,96,0.28); }
     .btn-danger:hover { background: rgba(224,80,96,0.2); color: #ffd4d9; }
+    .dialog-field { margin-top: 14px; }
+    .dialog-field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .dialog-field input:focus { border-color: var(--accent); }
+    .dialog-note { color: var(--muted); font-size: 0.76rem; line-height: 1.5; margin-top: 10px; }
+    .dialog-mode-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .dialog-mode-btn {
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .dialog-mode-btn.active {
+      border-color: var(--cool-accent);
+      color: var(--text);
+      background: rgba(88,176,196,0.1);
+    }
+    .range-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+    .range-list-item { font-size: 0.76rem; color: var(--muted); line-height: 1.5; font-family: var(--mono); }
 
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted); text-align: center; padding: 48px 20px; }
     .empty-state .ei { font-size: 2.8rem; }
@@ -304,6 +395,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Projects
     </button>
     <div class="topbar-title" id="days-title"></div>
+    <button class="topbar-action" id="btn-add-day" title="Add a day">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    </button>
     <button class="topbar-action" id="btn-settings" title="Project settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -318,9 +412,14 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Days
     </button>
     <div class="topbar-title" id="day-title"></div>
-    <button class="topbar-action" id="btn-clear-day" title="Clear this day">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-    </button>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button class="topbar-action" id="btn-delete-day" title="Delete this day">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>
+      <button class="topbar-action" id="btn-clear-day" title="Clear this day">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/></svg>
+      </button>
+    </div>
   </div>
   <div class="layer-body" id="day-body"></div>
 </div>
@@ -329,12 +428,15 @@
 <div id="settings-overlay"><div class="settings-sheet" id="settings-sheet"></div></div>
 <div id="report-overlay"><div class="report-panel" id="report-panel"></div></div>
 <div id="confirm-overlay"><div class="confirm-dialog" id="confirm-dialog"></div></div>
+<div id="day-picker-overlay"><div class="confirm-dialog" id="day-picker-dialog"></div></div>
 
 <script>
 (() => {
   let projects = [];
   let pid  = null;
   let pday = null;
+  let dayPayExpanded = false;
+  let daysSummaryExpanded = false;
 
   // ── Storage ──
   const LS = {
@@ -355,12 +457,143 @@
   const fmtMoney = (n,c) => (+n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+(c||'');
   const mealRates = { breakfast: 0.2, lunch: 0.4, dinner: 0.4 };
 
+  function normalizeDateRanges(ranges){
+    const cleaned = (Array.isArray(ranges) ? ranges : [])
+      .map(range => {
+        const from = range?.from || range?.dateFrom || '';
+        const to = range?.to || range?.dateTo || '';
+        if(!from || !to) return null;
+        return from <= to ? { from, to } : { from: to, to: from };
+      })
+      .filter(Boolean)
+      .sort((a,b)=>a.from.localeCompare(b.from));
+
+    const merged = [];
+    cleaned.forEach(range => {
+      const prev = merged[merged.length - 1];
+      if(!prev){
+        merged.push(range);
+        return;
+      }
+      const prevPlusOne = new Date(prev.to + 'T12:00:00');
+      prevPlusOne.setDate(prevPlusOne.getDate() + 1);
+      if(range.from <= prevPlusOne.toISOString().slice(0,10)){
+        if(range.to > prev.to) prev.to = range.to;
+      } else {
+        merged.push(range);
+      }
+    });
+    return merged;
+  }
+
+  function syncProjectDateBounds(p){
+    const ranges = normalizeDateRanges(p.dateRanges);
+    p.dateRanges = ranges;
+    if(ranges.length){
+      p.dateFrom = ranges[0].from;
+      p.dateTo = ranges[ranges.length - 1].to;
+    } else {
+      p.dateFrom = '';
+      p.dateTo = '';
+    }
+  }
+
+  function projectCoverageLabel(p){
+    const ranges = p?.dateRanges || [];
+    if(!ranges.length) return 'No dates set';
+    if(ranges.length === 1) return `${fmtDate(ranges[0].from)} → ${fmtDate(ranges[0].to)}`;
+    return `${fmtDate(ranges[0].from)} → ${fmtDate(ranges[ranges.length - 1].to)} · ${ranges.length} ranges`;
+  }
+
+  function projectRangeSummaryList(p){
+    const ranges = p?.dateRanges || [];
+    if(!ranges.length) return 'No dates set';
+    return ranges.map(range => {
+      const days = dateRange(range.from, range.to).length;
+      return `${fmtDate(range.from)} → ${fmtDate(range.to)} (${days} day${days === 1 ? '' : 's'})`;
+    }).join(' | ');
+  }
+
+  function getProjectListSegments(p){
+    const dates = projectDates(p);
+    if(!dates.length) return [];
+    const segments = [];
+    let start = dates[0];
+    let prev = dates[0];
+    for(let i=1; i<dates.length; i++){
+      const expected = new Date(prev + 'T12:00:00');
+      expected.setDate(expected.getDate() + 1);
+      if(dates[i] !== expected.toISOString().slice(0,10)){
+        segments.push({ from: start, to: prev });
+        start = dates[i];
+      }
+      prev = dates[i];
+    }
+    segments.push({ from: start, to: prev });
+    return segments;
+  }
+
+  function projectRangeListMarkup(p){
+    const segments = getProjectListSegments(p);
+    if(!segments.length) return '<div class="proj-meta-line">No dates set</div>';
+    return `<div class="proj-meta-lines">${segments.map(range => {
+      const days = dateRange(range.from, range.to).length;
+      if(range.from === range.to){
+        return `<div class="proj-meta-line">${fmtDate(range.from)} (1 day)</div>`;
+      }
+      return `<div class="proj-meta-line">${fmtDate(range.from)} → ${fmtDate(range.to)} (${days} days)</div>`;
+    }).join('')}</div>`;
+  }
+
+  function projectRangeSettingsMarkup(p){
+    const ranges = p?.dateRanges || [];
+    if(!ranges.length) return '<div class="field-note">No dates set.</div>';
+    const canDelete = ranges.length > 1;
+    return `<div class="range-list">${ranges.map((range, index) => {
+      if(range.from === range.to){
+        return `
+          <div class="range-edit-row" data-range-row="${index}">
+            <div class="field">
+              <label>${ranges.length === 1 ? 'Single Day' : `Single Day ${index + 1}`}</label>
+              <input type="date" data-range-kind="single" data-range-index="${index}" value="${range.from}">
+            </div>
+            ${canDelete ? `<button class="range-delete-btn" type="button" data-delete-range="${index}" title="Delete single day">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            </button>` : ''}
+          </div>`;
+      }
+      return `
+        <div class="range-edit-row" data-range-row="${index}">
+          <div class="fields-row" style="flex:1">
+            <div class="field">
+              <label>${ranges.length === 1 ? 'Start Date' : `Range ${index + 1} Start Date`}</label>
+              <input type="date" data-range-kind="from" data-range-index="${index}" value="${range.from}">
+            </div>
+            <div class="field">
+              <label>${ranges.length === 1 ? 'End Date' : `Range ${index + 1} End Date`}</label>
+              <input type="date" data-range-kind="to" data-range-index="${index}" value="${range.to}">
+            </div>
+          </div>
+          ${canDelete ? `<button class="range-delete-btn" type="button" data-delete-range="${index}" title="Delete range">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>` : ''}
+        </div>`;
+    }).join('')}</div>`;
+  }
+
   function normalizeProject(p){
     if(!p) return p;
     p.currency = (p.currency || 'THB').toUpperCase();
     p.perDiemEnabled = !!p.perDiemEnabled;
     p.perDiemAmount = p.perDiemAmount ?? '';
     p.perDiemCurrency = (p.perDiemCurrency || 'EUR').toUpperCase();
+    p.deletedDates = Array.isArray(p.deletedDates) ? [...new Set(p.deletedDates)].sort() : [];
+    p.dateRanges = normalizeDateRanges(
+      Array.isArray(p.dateRanges) && p.dateRanges.length
+        ? p.dateRanges
+        : (p.dateFrom && p.dateTo ? [{ from: p.dateFrom, to: p.dateTo }] : [])
+    );
+    syncProjectDateBounds(p);
     return p;
   }
 
@@ -379,6 +612,38 @@
     const days=[],d=new Date(from+'T12:00:00'),e=new Date(to+'T12:00:00');
     while(d<=e){days.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}
     return days;
+  }
+
+  function projectDates(p){
+    if(!p?.dateRanges?.length) return [];
+    const deleted = new Set(p.deletedDates || []);
+    return [...new Set(
+      p.dateRanges.flatMap(range => dateRange(range.from, range.to)).filter(date => !deleted.has(date))
+    )].sort();
+  }
+
+  function addProjectDateRange(p, from, to){
+    if(!p || !from || !to) return;
+    const start = from <= to ? from : to;
+    const end = from <= to ? to : from;
+    p.dateRanges = normalizeDateRanges([...(p.dateRanges || []), { from: start, to: end }]);
+    syncProjectDateBounds(p);
+    const restored = new Set(dateRange(start, end));
+    p.deletedDates = (p.deletedDates || []).filter(date => !restored.has(date));
+  }
+
+  function addSingleProjectDay(p, date){
+    if(!p || !date) return;
+    addProjectDateRange(p, date, date);
+  }
+
+  function getDateListMarkup(dates, emptyText){
+    if(!dates.length) return `<div class="muted-line">${emptyText}</div>`;
+    return `<div class="date-chip-list">${dates.map(date=>`
+      <div class="date-chip">
+        <span>${date}</span>
+        <button type="button" data-date="${date}" aria-label="Remove ${date}">×</button>
+      </div>`).join('')}</div>`;
   }
 
   // ── Calculations ──
@@ -408,8 +673,8 @@
 
   // Rest gap in hours between prev day end → this day start. Returns hours or null.
   function restGap(date, start, sessions){
-    const p=curP(); if(!p||!p.dateFrom||!p.dateTo) return null;
-    const days=dateRange(p.dateFrom,p.dateTo);
+    const p=curP(); if(!p||!p.dateRanges?.length) return null;
+    const days=projectDates(p);
     const idx=days.indexOf(date); if(idx<=0) return null;
     const prev=sessions[days[idx-1]];
     if(!prev?.end) return null;
@@ -448,6 +713,13 @@
     const restPen  = Math.ceil(restViolH) * hourRate * 1.50;
     const total    = normal + ot25 + ot50 + ot100 + restPen;
     return {base:normal, ot25, ot50, ot100, restPen, total};
+  }
+
+  function applyMinimumDayRate(pay, hours, rate, dayType){
+    if(dayType !== 'work' || !(hours > 0) || hours >= 10 || !rate) return pay;
+    if(pay.total >= rate) return pay;
+    const extras = (pay.ot25 || 0) + (pay.ot50 || 0) + (pay.ot100 || 0) + (pay.restPen || 0);
+    return { ...pay, base: rate, total: rate + extras };
   }
 
   function mealSummary(meals){
@@ -497,9 +769,7 @@
     const restViolation = restViolHours(date, sess.start, allSessions);
     let pay = calcDayPay(hours, rate, restViolation, dtype);
     breakdown.dayRateValue = rate;
-    if(dtype === 'work' && hours < 10 && hours > 0 && pay.total < rate){
-      pay = { ...pay, base: rate, ot25: 0, ot50: 0, ot100: 0, restPen: 0, total: rate };
-    }
+    pay = applyMinimumDayRate(pay, hours, rate, dtype);
 
     breakdown.hours = hours;
     breakdown.overtime = overtime;
@@ -514,9 +784,9 @@
 
   function getProjectReportRows(projId){
     const p = normalizeProject(projects.find(x=>x.id===projId));
-    if(!p || !p.dateFrom || !p.dateTo) return [];
+    if(!p || !p.dateRanges.length) return [];
     const sessions = LS.allSess(projId);
-    return dateRange(p.dateFrom, p.dateTo).map(date => getDayBreakdown(p, date, sessions[date], sessions));
+    return projectDates(p).map(date => getDayBreakdown(p, date, sessions[date], sessions));
   }
 
   function getReportTotals(rows){
@@ -537,7 +807,7 @@
 
   function summary(projId){
     const p=normalizeProject(projects.find(x=>x.id===projId));
-    if(!p) return {daysWorked:0,totalOT:0,totalPay:0,totalRestViol:0,totalPerDiem:0};
+    if(!p) return {daysWorked:0,totalOT:0,totalPay:0,totalDayRate:0,totalRestViol:0,totalPerDiem:0,totalOtPay:0,totalRestPay:0,totalFinal:0};
     const sess=LS.allSess(projId);
     let daysWorked=0, totalOT=0, totalPay=0, totalRestViol=0, totalPerDiem=0;
     const dates=Object.keys(sess).sort();
@@ -555,15 +825,35 @@
       totalOT+=calcOT(h);
       const rv=restViolHours(d,s.start,sess);
       totalRestViol+=Math.ceil(rv);
-      let dayPay=calcDayPay(h,parseFloat(p.rate)||0,rv,dtype).total;
       const rate=parseFloat(p.rate)||0;
-      if(dtype==='work' && h < 10 && h > 0 && dayPay < rate) dayPay = rate;
+      const pay=applyMinimumDayRate(calcDayPay(h,rate,rv,dtype), h, rate, dtype);
+      let dayPay=pay.total;
       totalPay+=dayPay;
     }
-    return {daysWorked,totalOT,totalPay,totalRestViol,totalPerDiem};
+    const totals = getReportTotals(getProjectReportRows(projId));
+    const totalDayRate = totals.dayRateValue || 0;
+    const totalOtPay = (totals.ot25 || 0) + (totals.ot50 || 0) + (totals.ot100 || 0);
+    const totalRestPay = totals.restPay || 0;
+    return {
+      daysWorked,
+      totalOT,
+      totalPay,
+      totalDayRate,
+      totalRestViol,
+      totalPerDiem,
+      totalOtPay,
+      totalRestPay,
+      totalFinal: totalPay + totalPerDiem
+    };
   }
 
   // ── Layer nav ──
+  function refreshProjectViews({ includeProjects=false } = {}){
+    if(includeProjects) renderProjects();
+    if(pid) renderDays();
+    if(pid && el('report-overlay')?.classList.contains('open')) openReport(pid);
+  }
+
   const LAYERS=['layer-projects','layer-days','layer-day'];
   function goTo(id){
     const ti=LAYERS.indexOf(id);
@@ -584,21 +874,20 @@
     } else {
       projects.forEach(raw=>{
         const p=normalizeProject(raw);
-        const s=summary(p.id);
+        const segments = getProjectListSegments(p);
+        const totalDays = projectDates(p).length;
         const item=document.createElement('div'); item.className='proj-item';
         item.innerHTML=`
-          <div class="proj-dot"></div>
           <div class="proj-info">
             <div class="proj-name">${p.name}</div>
-            <div class="proj-meta">${p.dateFrom&&p.dateTo?fmtDate(p.dateFrom)+' → '+fmtDate(p.dateTo):'No dates set'}${s.daysWorked?' · '+s.daysWorked+'d':''}</div>
+            ${projectRangeListMarkup(p)}
+            ${segments.length > 1 ? `<div class="proj-meta-total">${totalDays ? totalDays + ' days total' : '0 days total'}</div>` : ''}
           </div>
           <div class="proj-actions">
             <button class="icon-btn edit" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-            <button class="icon-btn del"  title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
             <div class="proj-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
           </div>`;
         item.querySelector('.edit').addEventListener('click',e=>{e.stopPropagation();openSettings(p.id);});
-        item.querySelector('.del').addEventListener('click', e=>{e.stopPropagation();deleteProject(p.id);});
         item.addEventListener('click',()=>openProject(p.id));
         body.appendChild(item);
       });
@@ -610,7 +899,7 @@
   }
 
   // ── Layer 1 ──
-  function openProject(id){ pid=id; pday=null; renderDays(); goTo('layer-days'); }
+  function openProject(id){ pid=id; pday=null; daysSummaryExpanded=false; renderDays(); goTo('layer-days'); }
 
   function renderDays(){
     const p=normalizeProject(curP()); if(!p) return;
@@ -619,7 +908,7 @@
 
     // Days list first, then summary
 
-    if(!p.dateFrom||!p.dateTo){
+    if(!p.dateRanges.length){
       const n=document.createElement('div'); n.className='notice';
       n.style.borderColor='var(--green)'; n.style.background='rgba(80,200,120,0.06)';
       n.textContent='No date range set. Tap ⚙ to configure this project.';
@@ -627,7 +916,14 @@
     }
 
     const sessions=LS.allSess(p.id);
-    const days=dateRange(p.dateFrom,p.dateTo);
+    const days=projectDates(p);
+    if(!days.length){
+      const empty=document.createElement('div');
+      empty.className='empty-state';
+      empty.innerHTML='<div class="ei">-</div><p>No active days in this project. Adjust the date range in settings if you want to add more days.</p>';
+      body.appendChild(empty);
+      return;
+    }
     const list=document.createElement('div'); list.className='days-list';
 
     days.forEach(date=>{
@@ -670,22 +966,51 @@
     // Now add summary below
     const s=summary(p.id);
     const sumCard=document.createElement('div');
-    sumCard.innerHTML=`<div class="chips ${p.perDiemEnabled ? 'chips-5' : 'chips-4'}">
+    sumCard.innerHTML=`<div class="chips ${p.perDiemEnabled ? 'chips-4' : 'chips-3'}">
         <div class="chip"><div class="cv">${s.daysWorked}</div><div class="cl">Days</div></div>
-        <div class="chip ya"><div class="cv">${fmtMoney(s.totalPay,p.currency||'THB')}</div><div class="cl">Pay</div></div>
-        ${p.perDiemEnabled ? `<div class="chip ya"><div class="cv">${fmtMoney(s.totalPerDiem,p.perDiemCurrency||'EUR')}</div><div class="cl">Per Diem</div></div>` : ''}
         <div class="chip yr"><div class="cv">${s.totalOT}h</div><div class="cl">OT</div></div>
         <div class="chip yr"><div class="cv">${s.totalRestViol}h</div><div class="cl">SR</div></div>
+        ${p.perDiemEnabled ? `<div class="chip ya"><div class="cv">${fmtMoney(s.totalPerDiem,p.perDiemCurrency||'EUR')}</div><div class="cl">Per Diem</div></div>` : ''}
       </div>
+      <div class="summary-panel" id="days-summary-panel">
+        <div class="chips chips-4">
+          <div class="chip ya"><div class="cv">${fmtMoney(s.totalDayRate,p.currency||'THB')}</div><div class="cl">Total Pay</div></div>
+          <div class="chip yr"><div class="cv">${fmtMoney(s.totalOtPay,p.currency||'THB')}</div><div class="cl">Overtime</div></div>
+          <div class="chip yr"><div class="cv">${fmtMoney(s.totalRestPay,p.currency||'THB')}</div><div class="cl">Short Rest</div></div>
+          <div class="chip yg"><div class="cv">${fmtMoney(s.totalFinal,p.currency||'THB')}</div><div class="cl">Total</div></div>
+        </div>
+      </div>
+      <button class="result-pay-toggle" id="btn-toggle-days-summary" type="button" aria-expanded="false" aria-label="Show pay totals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
       <div class="btn-row single">
         <button class="btn btn-primary" id="btn-view-report">View Full Report</button>
       </div>`;
     body.appendChild(sumCard);
+    wireDaysSummaryToggle();
     sumCard.querySelector('#btn-view-report').addEventListener('click',()=>openReport(p.id));
   }
 
+  function wireDaysSummaryToggle(){
+    const btn = el('btn-toggle-days-summary');
+    const panel = el('days-summary-panel');
+    if(!btn || !panel) return;
+    panel.classList.toggle('open', daysSummaryExpanded);
+    btn.classList.toggle('open', daysSummaryExpanded);
+    btn.setAttribute('aria-expanded', daysSummaryExpanded ? 'true' : 'false');
+    btn.setAttribute('aria-label', daysSummaryExpanded ? 'Hide pay totals' : 'Show pay totals');
+    btn.addEventListener('click',()=>{
+      const open = !panel.classList.contains('open');
+      daysSummaryExpanded = open;
+      panel.classList.toggle('open', open);
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Hide pay totals' : 'Show pay totals');
+    });
+  }
+
   // ── Layer 2 ──
-  function openDay(date){ pday=date; renderDay(); goTo('layer-day'); }
+  function openDay(date){ pday=date; dayPayExpanded=false; renderDay(); goTo('layer-day'); }
 
   function renderDay(){
     const p=normalizeProject(curP()); if(!p) return;
@@ -720,15 +1045,12 @@
         <div class="meal-grid">
           <button class="meal-btn ${sess.meals.breakfast ? 'on' : ''}" id="meal-breakfast" type="button">
             <div class="meal-name">Breakfast</div>
-            <div class="meal-share">20%</div>
           </button>
           <button class="meal-btn ${sess.meals.lunch ? 'on' : ''}" id="meal-lunch" type="button">
             <div class="meal-name">Lunch</div>
-            <div class="meal-share">40%</div>
           </button>
           <button class="meal-btn ${sess.meals.dinner ? 'on' : ''}" id="meal-dinner" type="button">
             <div class="meal-name">Dinner</div>
-            <div class="meal-share">40%</div>
           </button>
         </div>
       </div>` : ''}`;
@@ -736,7 +1058,7 @@
 
     // ── Result card ──
     const resCard=document.createElement('div'); resCard.className='card';
-    resCard.innerHTML='<div id="d-result"></div>';
+    resCard.innerHTML=`<div id="d-result"></div>`;
     body.appendChild(resCard);
 
     // Wire day-type buttons
@@ -807,56 +1129,80 @@
     if(isOff){
       const pay=rate*0.5;
       res.innerHTML=`<div class="result-items">
-        <div class="result-row result-total"><span class="rl">${dtype==='off'?'Day Off':'Travel Day'} (50%)</span><span class="rv accent">${fmtMoney(pay,cur)}</span></div>
-        ${p.perDiemEnabled ? `<div class="result-row"><span class="rl">Per diem meals</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>` : ''}
+        <div class="result-row"><span class="rl">Total Hours</span><span class="rv accent">0h</span></div>
+        ${p.perDiemEnabled && perDiem.total > 0 ? `<div class="result-row"><span class="rl">Per diem</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>` : ''}
+        <div class="result-pay-panel" id="d-pay-panel">
+          <div class="result-row result-total"><span class="rl">${dtype==='off'?'Day Off':'Travel Day'} (50%)</span><span class="rv accent">${fmtMoney(pay,cur)}</span></div>
+        </div>
+        <button class="result-pay-toggle" id="btn-toggle-pay" type="button" aria-expanded="false" aria-label="Show pay details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
       </div>`;
-      renderDays(); return;
+      wireResultPayToggle();
+      refreshProjectViews(); return;
     }
 
     if(!start||!end){
       res.innerHTML=`<div class="result-items">
+        <div class="result-row"><span class="rl">Total Hours</span><span class="rv accent">0h</span></div>
+        ${p.perDiemEnabled && perDiem.total > 0 ? `<div class="result-row"><span class="rl">Per diem</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>` : ''}
         <p style="color:var(--muted);font-size:0.82rem;padding:4px 0">Enter start and end time.</p>
-        ${p.perDiemEnabled ? `<div class="result-row"><span class="rl">Per diem meals</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>` : ''}
+        <div class="result-pay-panel" id="d-pay-panel">
+          <div class="result-row"><span class="rl">Day rate (10h)</span><span class="rv">${fmtMoney(rate,cur)}</span></div>
+        </div>
+        <button class="result-pay-toggle" id="btn-toggle-pay" type="button" aria-expanded="false" aria-label="Show pay details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
       </div>`;
+      wireResultPayToggle();
       return;
     }
 
     const h   = calcH(date,start,end,bMins);
     const ot  = calcOT(h);
     const rv  = restViolHours(date,start,sessions);
-    let pay = calcDayPay(h,rate,rv,dtype);
+    let pay = applyMinimumDayRate(calcDayPay(h,rate,rv,dtype), h, rate, dtype);
     const hourR = rate/10;
 
-    // Ensure day total is at least the day rate if worked less than 10h
-    if(dtype==='work' && h < 10 && h > 0 && pay.total < rate){
-      pay.total = rate;
-      pay.base = rate;
-      pay.ot25 = 0;
-      pay.ot50 = 0;
-      pay.ot100 = 0;
-      pay.restPen = 0;
-    }
-
     let html='<div class="result-items">';
-    html+=`<div class="result-row"><span class="rl">Total Hours</span><span class="rv accent">${h}h</span></div>`;
-    html+=`<div class="result-row"><span class="rl">OT</span><span class="rv ${ot>0?'warn':'green'}">${ot}h</span></div>`;
-    if(rv>0) html+=`<div class="result-row"><span class="rl">SR</span><span class="rv danger">${Math.ceil(rv)}h (&lt;11h rest)</span></div>`;
-    html+='<div class="result-divider"></div>';
+    html+=`<div class="result-row"><span class="rl">Total Hours</span><span class="rv">${h}h</span></div>`;
+    if(ot>0) html+=`<div class="result-row"><span class="rl">Overtime</span><span class="rv">${ot}h</span></div>`;
+    if(rv>0) html+=`<div class="result-row"><span class="rl">Short Rest</span><span class="rv">${Math.ceil(rv)}h</span></div>`;
+    if(p.perDiemEnabled && perDiem.total > 0) html+=`<div class="result-row"><span class="rl">Per diem</span><span class="rv">${fmtMoney(perDiem.total,perDiemCur)}</span></div>`;
+    html+='<div class="result-pay-panel" id="d-pay-panel">';
     html+=`<div class="result-row"><span class="rl">Day rate (10h)</span><span class="rv">${fmtMoney(rate,cur)}</span></div>`;
-    if(ot>=1) html+=`<div class="result-row"><span class="rl">11–12h (+25%)</span><span class="rv warn">${fmtMoney(Math.min(ot,2)*hourR*1.25,cur)}</span></div>`;
-    if(ot>=3) html+=`<div class="result-row"><span class="rl">13–14h (+50%)</span><span class="rv warn">${fmtMoney(Math.min(Math.max(ot-2,0),2)*hourR*1.50,cur)}</span></div>`;
-    if(ot>=5) html+=`<div class="result-row"><span class="rl">&gt;14h (+100%)</span><span class="rv danger">${fmtMoney(Math.max(ot-4,0)*hourR*2.00,cur)}</span></div>`;
-    if(rv>0)  html+=`<div class="result-row"><span class="rl">SR Pay (+50%)</span><span class="rv danger">${fmtMoney(Math.ceil(rv)*hourR*1.50,cur)}</span></div>`;
-    if(p.perDiemEnabled){
-      html+='<div class="result-divider"></div>';
-      html+=`<div class="result-row"><span class="rl">Per diem total</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>`;
-    }
-    html+='<div class="result-divider"></div>';
-    html+=`<div class="result-row result-total"><span class="rl">Day Total</span><span class="rv accent">${fmtMoney(pay.total,cur)}</span></div>`;
+    if(ot>=1) html+=`<div class="result-row"><span class="rl">11–12h (+25%)</span><span class="rv">${fmtMoney(Math.min(ot,2)*hourR*1.25,cur)}</span></div>`;
+    if(ot>=3) html+=`<div class="result-row"><span class="rl">13–14h (+50%)</span><span class="rv">${fmtMoney(Math.min(Math.max(ot-2,0),2)*hourR*1.50,cur)}</span></div>`;
+    if(ot>=5) html+=`<div class="result-row"><span class="rl">&gt;14h (+100%)</span><span class="rv">${fmtMoney(Math.max(ot-4,0)*hourR*2.00,cur)}</span></div>`;
+    if(rv>0)  html+=`<div class="result-row"><span class="rl">Short Rest (+50%)</span><span class="rv">${fmtMoney(Math.ceil(rv)*hourR*1.50,cur)}</span></div>`;
+    html+=`<div class="result-row result-total"><span class="rl">Day Total</span><span class="rv">${fmtMoney(pay.total,cur)}</span></div>`;
+    html+='</div>';
+    html+=`<button class="result-pay-toggle" id="btn-toggle-pay" type="button" aria-expanded="false" aria-label="Show pay details">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+    </button>`;
     html+='</div>';
 
     res.innerHTML=html;
-    renderDays();
+    wireResultPayToggle();
+    refreshProjectViews();
+  }
+
+  function wireResultPayToggle(){
+    const btn = el('btn-toggle-pay');
+    const panel = el('d-pay-panel');
+    if(!btn || !panel) return;
+    panel.classList.toggle('open', dayPayExpanded);
+    btn.classList.toggle('open', dayPayExpanded);
+    btn.setAttribute('aria-expanded', dayPayExpanded ? 'true' : 'false');
+    btn.setAttribute('aria-label', dayPayExpanded ? 'Hide pay details' : 'Show pay details');
+    btn.addEventListener('click',()=>{
+      const open = !panel.classList.contains('open');
+      dayPayExpanded = open;
+      panel.classList.toggle('open', open);
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Hide pay details' : 'Show pay details');
+    });
   }
 
   function openReport(projId){
@@ -869,7 +1215,7 @@
       <div class="report-head">
         <div>
           <div class="report-title">Detailed Report</div>
-          <div class="report-sub">${p.name} · ${p.dateFrom || '-'} to ${p.dateTo || '-'}</div>
+          <div class="report-sub">${p.name} · ${projectCoverageLabel(p)}</div>
         </div>
         <div class="report-actions">
           <button class="report-close" id="btn-export-report" type="button">Export CSV</button>
@@ -1026,19 +1372,91 @@
     el('confirm-dialog').innerHTML = '';
   }
 
+  function openDayPickerDialog(){
+    const p = normalizeProject(curP());
+    if(!p) return;
+    const overlay = el('day-picker-overlay');
+    const dialog = el('day-picker-dialog');
+    const defaultDate = pday || p.dateTo || p.dateFrom || new Date().toISOString().slice(0,10);
+    dialog.innerHTML = `
+      <div class="confirm-title">Add days</div>
+      <div class="confirm-text">Choose a single day or a whole date range for this project.</div>
+      <div class="dialog-mode-row">
+        <button class="dialog-mode-btn active" id="add-mode-single" type="button">Single Day</button>
+        <button class="dialog-mode-btn" id="add-mode-range" type="button">Day Range</button>
+      </div>
+      <div class="dialog-field">
+        <input type="date" id="add-day-date" value="${defaultDate}">
+      </div>
+      <div class="dialog-field" id="add-range-end-wrap" style="display:none">
+        <input type="date" id="add-day-date-end" value="${defaultDate}">
+      </div>
+      <div class="dialog-note">Picking a date outside the current project range will extend the range to include it.</div>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="btn-day-picker-cancel" type="button">Cancel</button>
+        <button class="btn btn-primary" id="btn-day-picker-save" type="button">Add Day</button>
+      </div>`;
+    overlay.classList.add('open');
+    const input = el('add-day-date');
+    input?.focus();
+    el('add-mode-single').addEventListener('click',()=>setAddDayMode('single'));
+    el('add-mode-range').addEventListener('click',()=>setAddDayMode('range'));
+    el('btn-day-picker-cancel').addEventListener('click', closeDayPickerDialog);
+    el('btn-day-picker-save').addEventListener('click', addDayFromPicker);
+  }
+
+  function setAddDayMode(mode){
+    const isRange = mode === 'range';
+    el('add-mode-single')?.classList.toggle('active', !isRange);
+    el('add-mode-range')?.classList.toggle('active', isRange);
+    el('add-range-end-wrap').style.display = isRange ? '' : 'none';
+    el('btn-day-picker-save').textContent = isRange ? 'Add Range' : 'Add Day';
+  }
+
+  function closeDayPickerDialog(){
+    el('day-picker-overlay').classList.remove('open');
+    el('day-picker-dialog').innerHTML = '';
+  }
+
+  function addDayFromPicker(){
+    const p = normalizeProject(curP());
+    const start = el('add-day-date')?.value;
+    const isRange = el('add-mode-range')?.classList.contains('active');
+    const end = isRange ? (el('add-day-date-end')?.value || start) : start;
+    if(!p || !start || !end) return;
+
+    if(isRange) addProjectDateRange(p, start, end);
+    else addSingleProjectDay(p, start);
+    LS.set('wl_projects', projects);
+    closeDayPickerDialog();
+    refreshProjectViews({ includeProjects:true });
+    pday = null;
+    goTo('layer-days');
+  }
+
 
   // ── Settings ──
+  function wireSettingsRangeDeleteButtons(sheet){
+    [...sheet.querySelectorAll('[data-delete-range]')].forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        btn.closest('[data-range-row]')?.remove();
+      });
+    });
+  }
+
   function openSettings(id){
     pid=id; const p=normalizeProject(curP());
     const overlay=el('settings-overlay'); const sheet=el('settings-sheet');
     sheet.innerHTML=`
       <div class="sheet-handle"></div>
-      <div class="sheet-title">Project Settings</div>
-      <div class="field"><label>Project Name</label><input type="text" id="s-name" value="${p.name}" placeholder="Project name"></div>
-      <div class="fields-row">
-        <div class="field"><label>Start Date</label><input type="date" id="s-from" value="${p.dateFrom}"></div>
-        <div class="field"><label>End Date</label><input type="date" id="s-to" value="${p.dateTo}"></div>
+      <div class="sheet-head">
+        <div class="sheet-title">Project Settings</div>
+        <button class="sheet-icon-btn danger" id="s-delete" type="button" title="Delete Project">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
       </div>
+      <div class="field"><label>Project Name</label><input type="text" id="s-name" value="${p.name}" placeholder="Project name"></div>
+      <div class="field">${projectRangeSettingsMarkup(p)}</div>
       <div class="fields-row">
         <div class="field"><label>Daily Rate</label><input type="number" id="s-rate" value="${p.rate}" placeholder=""></div>
         <div class="field"><label>Currency</label><input type="text" id="s-cur" value="${p.currency||'THB'}" maxlength="5"></div>
@@ -1059,6 +1477,7 @@
       <button class="btn btn-primary" id="s-save">Save</button>
       <button class="btn btn-ghost" id="s-cancel">Cancel</button>`;
     overlay.classList.add('open');
+    wireSettingsRangeDeleteButtons(sheet);
     el('s-pd-enabled').addEventListener('click',()=>{
       const btn=el('s-pd-enabled');
       const on=!btn.classList.contains('on');
@@ -1068,23 +1487,46 @@
     });
     el('s-save').addEventListener('click',()=>{
       p.name=el('s-name').value.trim()||p.name;
-      p.dateFrom=el('s-from').value; p.dateTo=el('s-to').value;
+      const rangeInputs = [...sheet.querySelectorAll('[data-range-kind]')];
+      const nextRanges = [];
+      const grouped = new Map();
+      rangeInputs.forEach(input=>{
+        const index = input.getAttribute('data-range-index');
+        const kind = input.getAttribute('data-range-kind');
+        const value = input.value;
+        if(!grouped.has(index)) grouped.set(index, {});
+        grouped.get(index)[kind] = value;
+      });
+      [...grouped.keys()].sort((a,b)=>Number(a)-Number(b)).forEach(index=>{
+        const item = grouped.get(index);
+        if(item.single){
+          nextRanges.push({ from: item.single, to: item.single });
+          return;
+        }
+        if(item.from && item.to) nextRanges.push({ from: item.from, to: item.to });
+      });
+      p.dateRanges = normalizeDateRanges(nextRanges);
+      syncProjectDateBounds(p);
       p.rate=el('s-rate').value;
       p.currency=(el('s-cur').value.trim()||'THB').toUpperCase();
       p.perDiemEnabled=el('s-pd-enabled').classList.contains('on');
-      p.perDiemAmount=p.perDiemEnabled ? el('s-pd-amount').value : '';
+      p.perDiemAmount=el('s-pd-amount').value;
       p.perDiemCurrency=(el('s-pd-cur').value.trim()||'EUR').toUpperCase();
       LS.set('wl_projects',projects);
-      closeSettings(); renderProjects(); renderDays();
+      closeSettings(); refreshProjectViews({ includeProjects:true });
     });
     el('s-cancel').addEventListener('click',closeSettings);
+    el('s-delete').addEventListener('click',()=>{
+      closeSettings();
+      deleteProject(p.id);
+    });
     overlay.addEventListener('click',e=>{ if(e.target===overlay) closeSettings(); });
   }
   function closeSettings(){ el('settings-overlay').classList.remove('open'); }
 
   // ── CRUD ──
   function addProject(){
-    const p={id:uid(),name:'New Project',dateFrom:'',dateTo:'',rate:'',currency:'THB',perDiemEnabled:false,perDiemAmount:'',perDiemCurrency:'EUR'};
+    const p={id:uid(),name:'New Project',dateFrom:'',dateTo:'',dateRanges:[],rate:'',currency:'THB',perDiemEnabled:false,perDiemAmount:'',perDiemCurrency:'EUR'};
     projects.push(p); LS.set('wl_projects',projects); renderProjects(); openSettings(p.id);
   }
   function deleteProject(id){
@@ -1104,8 +1546,36 @@
   }
   function clearDay(){
     if(!pid||!pday) return;
-    if(!confirm('Clear this day?')) return;
-    LS.setSess(pid,pday,null); renderDay(); renderDays();
+    openConfirmDialog({
+      title: 'Clear day?',
+      message: `This will remove all logged details for ${dayName(pday)} ${fmtDate(pday)}.`,
+      confirmLabel: 'Clear Day',
+      danger: true,
+      onConfirm: ()=>{
+        LS.setSess(pid,pday,null); renderDay(); refreshProjectViews();
+      }
+    });
+  }
+
+  function deleteDay(){
+    const p = normalizeProject(curP());
+    if(!p || !pday) return;
+    openConfirmDialog({
+      title: 'Delete day?',
+      message: `This will remove ${dayName(pday)} ${fmtDate(pday)} from this project's day list.`,
+      confirmLabel: 'Delete Day',
+      danger: true,
+      onConfirm: ()=>{
+        const deleted = new Set(p.deletedDates || []);
+        deleted.add(pday);
+        p.deletedDates = [...deleted].sort();
+        LS.setSess(p.id, pday, null);
+        LS.set('wl_projects', projects);
+        pday = null;
+        refreshProjectViews();
+        goTo('layer-days');
+      }
+    });
   }
 
 
@@ -1113,7 +1583,7 @@
   function init(){
     projects=LS.get('wl_projects',null);
     if(!Array.isArray(projects)||!projects.length){
-      projects=[{id:uid(),name:'My First Project',dateFrom:'',dateTo:'',rate:'',currency:'THB',perDiemEnabled:false,perDiemAmount:'',perDiemCurrency:'EUR'}];
+      projects=[{id:uid(),name:'My First Project',dateFrom:'',dateTo:'',dateRanges:[],rate:'',currency:'THB',perDiemEnabled:false,perDiemAmount:'',perDiemCurrency:'EUR'}];
       LS.set('wl_projects',projects);
     }
     projects=projects.map(normalizeProject);
@@ -1121,10 +1591,13 @@
 
     el('btn-back-proj').addEventListener('click',()=>{goTo('layer-projects');renderProjects();});
     el('btn-back-days').addEventListener('click',()=>{goTo('layer-days');renderDays();});
+    el('btn-add-day').addEventListener('click', openDayPickerDialog);
     el('btn-settings').addEventListener('click',()=>{if(pid)openSettings(pid);});
+    el('btn-delete-day').addEventListener('click',deleteDay);
     el('btn-clear-day').addEventListener('click',clearDay);
     el('report-overlay').addEventListener('click',e=>{ if(e.target===el('report-overlay')) closeReport(); });
     el('confirm-overlay').addEventListener('click',e=>{ if(e.target===el('confirm-overlay')) closeConfirmDialog(); });
+    el('day-picker-overlay').addEventListener('click',e=>{ if(e.target===el('day-picker-overlay')) closeDayPickerDialog(); });
 
     renderProjects();
   }
