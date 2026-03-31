@@ -110,10 +110,16 @@
     .dr-num  { font-family: var(--mono); font-size: 0.92rem; margin-top: 2px; }
     .dr-info { flex: 1; min-width: 0; }
     .dr-times { font-family: var(--mono); font-size: 0.78rem; color: var(--text); }
-    .dr-hours { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); }
-    .dr-ot, .dr-rest { font-family: var(--mono); font-size: 0.74rem; }
-    .dr-ot    { color: #c68f66; }
-    .dr-rest  { color: #c57b84; }
+    .dr-hours {
+      font-family: var(--mono); font-size: 0.74rem; color: var(--muted);
+      display: grid; align-items: center; grid-template-columns: 5ch 1ch 8ch 1ch 8ch; column-gap: 6px;
+    }
+    .dr-hours-main { color: var(--muted); white-space: nowrap; }
+    .dr-sep { color: var(--muted); text-align: center; }
+    .dr-ot, .dr-rest {
+      font-family: var(--mono); font-size: 0.74rem; color: #c68f66;
+      white-space: nowrap; min-width: 0; display: inline-block;
+    }
     .dr-badge { font-size: 0.8rem; font-weight: 700; padding: 5px 10px; border-radius: 6px; background: rgba(88,176,196,0.14); color: var(--cool-accent); display: inline-block; }
     .dr-empty { font-size: 0.78rem; color: var(--muted); }
     .dr-arr   { color: var(--border); flex-shrink: 0; }
@@ -957,6 +963,7 @@
         <div class="dr-date"><div class="dr-name">${dayName(date)}</div><div class="dr-num">${fmtDate(date)}</div></div>
         <div class="dr-info">${info}</div>
         <div class="dr-arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>`;
+      normalizeDayRowHours(row);
       row.addEventListener('click',()=>openDay(date));
       list.appendChild(row);
     });
@@ -968,8 +975,8 @@
     const sumCard=document.createElement('div');
     sumCard.innerHTML=`<div class="chips ${p.perDiemEnabled ? 'chips-4' : 'chips-3'}">
         <div class="chip"><div class="cv">${s.daysWorked}</div><div class="cl">Days</div></div>
-        <div class="chip yr"><div class="cv">${s.totalOT}h</div><div class="cl">OT</div></div>
-        <div class="chip yr"><div class="cv">${s.totalRestViol}h</div><div class="cl">SR</div></div>
+        <div class="chip yr"><div class="cv">${s.totalOT}h</div><div class="cl">Overtime</div></div>
+        <div class="chip yr"><div class="cv">${s.totalRestViol}h</div><div class="cl">Short Rest</div></div>
         ${p.perDiemEnabled ? `<div class="chip ya"><div class="cv">${fmtMoney(s.totalPerDiem,p.perDiemCurrency||'EUR')}</div><div class="cl">Per Diem</div></div>` : ''}
       </div>
       <div class="summary-panel" id="days-summary-panel">
@@ -1058,6 +1065,8 @@
 
     // ── Result card ──
     const resCard=document.createElement('div'); resCard.className='card';
+    resCard.id='d-result-card';
+    resCard.style.display='none';
     resCard.innerHTML=`<div id="d-result"></div>`;
     body.appendChild(resCard);
 
@@ -1101,7 +1110,9 @@
       lunch: !!el('meal-lunch')?.classList.contains('on'),
       dinner: !!el('meal-dinner')?.classList.contains('on')
     };
-    const res    = el('d-result'); if(!res) return;
+    const res    = el('d-result');
+    const resCard = el('d-result-card');
+    if(!res || !resCard) return;
 
     const isOff=dtype==='off'||dtype==='travel';
     const existing = normalizeSession(LS.getSess(p.id,date)||{});
@@ -1127,9 +1138,9 @@
     const perDiemCur = p.perDiemCurrency || 'EUR';
 
     if(isOff){
+      resCard.style.display='';
       const pay=rate*0.5;
       res.innerHTML=`<div class="result-items">
-        <div class="result-row"><span class="rl">Total Hours</span><span class="rv accent">0h</span></div>
         ${p.perDiemEnabled && perDiem.total > 0 ? `<div class="result-row"><span class="rl">Per diem</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>` : ''}
         <div class="result-pay-panel" id="d-pay-panel">
           <div class="result-row result-total"><span class="rl">${dtype==='off'?'Day Off':'Travel Day'} (50%)</span><span class="rv accent">${fmtMoney(pay,cur)}</span></div>
@@ -1143,21 +1154,20 @@
     }
 
     if(!start||!end){
-      res.innerHTML=`<div class="result-items">
-        <div class="result-row"><span class="rl">Total Hours</span><span class="rv accent">0h</span></div>
-        ${p.perDiemEnabled && perDiem.total > 0 ? `<div class="result-row"><span class="rl">Per diem</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>` : ''}
-        <p style="color:var(--muted);font-size:0.82rem;padding:4px 0">Enter start and end time.</p>
-        <div class="result-pay-panel" id="d-pay-panel">
-          <div class="result-row"><span class="rl">Day rate (10h)</span><span class="rv">${fmtMoney(rate,cur)}</span></div>
-        </div>
-        <button class="result-pay-toggle" id="btn-toggle-pay" type="button" aria-expanded="false" aria-label="Show pay details">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-      </div>`;
-      wireResultPayToggle();
+      if(p.perDiemEnabled && perDiem.total > 0){
+        resCard.style.display='';
+        res.innerHTML=`<div class="result-items">
+          <div class="result-row"><span class="rl">Per diem</span><span class="rv green">${fmtMoney(perDiem.total,perDiemCur)}</span></div>
+          <p style="color:var(--muted);font-size:0.82rem;padding:4px 0">Enter start and end time.</p>
+        </div>`;
+      } else {
+        res.innerHTML='';
+        resCard.style.display='none';
+      }
       return;
     }
 
+    resCard.style.display='';
     const h   = calcH(date,start,end,bMins);
     const ot  = calcOT(h);
     const rv  = restViolHours(date,start,sessions);
@@ -1203,6 +1213,74 @@
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       btn.setAttribute('aria-label', open ? 'Hide pay details' : 'Show pay details');
     });
+  }
+
+  function normalizeDayRowHours(row){
+    const hours = row.querySelector('.dr-hours');
+    if(!hours) return;
+    const ot = hours.querySelector('.dr-ot');
+    const rest = hours.querySelector('.dr-rest');
+    const hasOt = !!ot;
+    const hasRest = !!rest;
+    const mainText = [...hours.childNodes]
+      .filter(node=>node.nodeType===Node.TEXT_NODE)
+      .map(node=>node.textContent || '')
+      .join(' ')
+      .replace(/·/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+
+    hours.innerHTML = '';
+    hours.style.gridTemplateColumns = hasOt && hasRest
+      ? '5ch 1ch 8ch 1ch 8ch'
+      : '5ch 1ch 8ch';
+
+    if(mainText){
+      const main = document.createElement('span');
+      main.className = 'dr-hours-main';
+      main.textContent = mainText;
+      hours.appendChild(main);
+    } else {
+      hours.appendChild(document.createElement('span'));
+    }
+    if(hasOt || hasRest){
+      const firstSep = document.createElement('span');
+      firstSep.className = 'dr-sep';
+      firstSep.textContent = '\u00B7';
+      hours.appendChild(firstSep);
+      const firstMetric = hasOt ? ot : rest;
+      firstMetric.textContent = firstMetric.textContent.trim();
+      hours.appendChild(firstMetric);
+      if(hasOt && hasRest){
+        const restSep = document.createElement('span');
+        restSep.className = 'dr-sep';
+        restSep.textContent = '\u00B7';
+        hours.appendChild(restSep);
+        rest.textContent = rest.textContent.trim();
+        hours.appendChild(rest);
+      }
+      return;
+    }
+    const otSep = document.createElement('span');
+    otSep.className = 'dr-sep';
+    otSep.textContent = ot ? '·' : '';
+    hours.appendChild(otSep);
+    if(ot){
+      ot.textContent = ot.textContent.trim();
+      hours.appendChild(ot);
+    } else {
+      hours.appendChild(document.createElement('span'));
+    }
+    const restSep = document.createElement('span');
+    restSep.className = 'dr-sep';
+    restSep.textContent = rest ? '·' : '';
+    hours.appendChild(restSep);
+    if(rest){
+      rest.textContent = rest.textContent.trim();
+      hours.appendChild(rest);
+    } else {
+      hours.appendChild(document.createElement('span'));
+    }
   }
 
   function openReport(projId){
